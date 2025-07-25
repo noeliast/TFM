@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <GVL Name="GVL_Outputs" Id="{5d0401ef-0551-408e-b6f0-12ff5e33a802}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	
+	
+	//numero de cintas
+	//numCintas : INT;
+	
+	{attribute 'OPC.UA.DA' := '1'}
+	luzVerdeCuadro : BOOL; // Senal luminosa verde cuadro 
+	
+	{attribute 'OPC.UA.DA' := '1'}
+	luzAmarillaCuadro : BOOL; // Senal luminosa amarilla cuadro 
+
+	{attribute 'OPC.UA.DA' := '1'}
+	luzRojaCuadro : BOOL; // Senal luminosa roja cuadro 
+	
+	{attribute 'OPC.UA.DA' := '1'}
+	cinta1 : BOOL; // cinta emisora bases
+
+	{attribute 'OPC.UA.DA' := '1'}
+	cinta2 : BOOL; // cinta 2 
+	
+	{attribute 'OPC.UA.DA' := '1'}
+	cinta3 : BOOL; // cinta 3
+	
+	{attribute 'OPC.UA.DA' := '1'}
+	cintaSalidaColor : BOOL; // cinta descarte por color 
+	
+END_VAR
+
+
+
+VAR_GLOBAL CONSTANT
+	
+	
+	//numero de cintas
+	numCintas : INT := 4;
+
+END_VAR
+
+]]></Declaration>
+  </GVL>
+</TcPlcObject>
