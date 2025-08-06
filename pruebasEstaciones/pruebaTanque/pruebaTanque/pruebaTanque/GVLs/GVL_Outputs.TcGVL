@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <GVL Name="GVL_Outputs" Id="{8ef2867b-fcd8-453f-bcab-f0f241f210a9}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	
+//	// Salidas
+//	{attribute 'OPC.UA.DA' := '1'}
+//    // Salidas digitales
+//{attribute 'OPC.UA.DA' := '1'}    
+//cintaEntrada      : BOOL;    // Cinta de entrada con sensor
+//{attribute 'OPC.UA.DA' := '1'}    
+//cintaTanque       : BOOL;    // Cinta frente al tanque
+// {attribute 'OPC.UA.DA' := '1'}
+//   cintaSalida       : BOOL;    // Cinta con removedor
+//{attribute 'OPC.UA.DA' := '1'}   
+// valveIn           : BOOL;    // Válvula de entrada del tanque
+//{attribute 'OPC.UA.DA' := '1'}  
+//  valveOut          : BOOL;    // Válvula de salida del tanque
+
+
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

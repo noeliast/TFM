@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <POU Name="CalculoTiempoLLenado" Id="{3c6a9e17-f1d0-49a6-9aa4-3753ff74e61f}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION CalculoTiempoLLenado : TIME
+VAR_INPUT
+    Volume_L : REAL;
+    Flow_Lps : REAL;
+END_VAR
+VAR
+    msTime : UDINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Tiempo llenado = (volumen barril / caudal tanque)
+IF Flow_Lps > 0 THEN
+    msTime := TRUNC(Volume_L / Flow_Lps * 1000); // milisegundos
+ELSE
+    msTime := 0;
+END_IF
+
+CalculoTiempoLLenado := T#0MS + msTime * T#1MS; // suma de TIME]]></ST>
+    </Implementation>
+    <LineIds Name="CalculoTiempoLLenado">
+      <LineId Id="16" Count="7" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

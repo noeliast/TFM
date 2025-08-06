@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <POU Name="llenadoBarril" Id="{bb9f3cae-b42c-4a34-baf8-63237e335473}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK llenadoBarril
+VAR_INPUT
+//	//Elementos de entrada del tanque
+//	StartFill : BOOL;        // Boton para iniciar llenado
+//    StartDrain : B	OOL;       // Boton para vaciar
+//    LevelLow : BOOL;         // Sensor nivel bajo
+//    LevelHigh : BOOL;        // Sensor nivel alto
+//    Filling : BOOL;          // Estado de llenado
+//    Draining : BOOL;         // Estado de vaciado
+	
+	caudalSalidaTanque : REAL;
+	volumenBarril : REAL;
+	
+END_VAR
+VAR_OUTPUT
+	// Elemtnos de salida del tanque
+	ValveIn : BOOL;          // Valvula de entrada al tanque
+    ValveOut : BOOL;         // Valvula de salida del tanque
+	cintaEntrada : BOOL;
+	cintaTanque : BOOL;
+	cintaSalida : BOOL;
+	llenadoCompleto : BOOL;
+END_VAR
+VAR
+	llenarTanque: TON;
+	inicioLLenado: BOOL;
+	tiempoLLenado: TIME;
+	
+	rellenarTanque: BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Se calcula el tiempo de llenado para los barriles
+tiempoLLenado := CalculoTiempoLLenado(Volume_L := volumenBarril, Flow_Lps := caudalSalidaTanque); 
+inicioLLenado:= TRUE;
+llenadoCompleto := false;
+// Se non hai nivel minimo rellenase tanque
+IF  GVL_Inputs.LevelLow < 2.0 THEN
+	rellenarTanque := TRUE;
+	inicioLLenado := FALSE;
+END_IF
+ 
+IF rellenarTanque AND GVL_Inputs.LevelHigh > 8.0 THEN
+	rellenarTanque := FALSE;
+	inicioLLenado := TRUE;
+END_IF
+
+IF rellenarTanque THEN
+	GVL_Outputs.ValveIn := TRUE;
+END_IF
+
+IF not rellenarTanque THEN
+	GVL_Outputs.ValveIn := FALSE;
+END_IF
+
+// Si hay fluido en el tanque se llenan los barriles
+IF inicioLLenado THEN
+	
+	//GVL_Inputs.StartFill := TRUE;        // Boton para iniciar llenado
+	GVL_Inputs.StartDrain := TRUE;       // Boton para vaciar
+	//Se procede al llenado durante el tiempo calculado
+	llenarTanque( IN:=TRUE, PT:=tiempoLLenado);
+    //LevelLow : BOOL;         // Sensor nivel bajo
+    //LevelHigh : BOOL;        // Sensor nivel alto
+    //Filling : BOOL;          // Estado de llenado
+    //Draining : BOOL;         // Estado de vaciado
+	
+	// Si paso el tiempo calculado se reactiva la el proceso
+	 IF llenarTanque.Q THEN
+		 GVL_Inputs.StartDrain := FALSE; 
+		 inicioLLenado := FALSE;
+		 // Se arrancan las cintas
+		cintaEntrada := TRUE;
+		cintaTanque :=  TRUE;
+		cintaSalida := TRUE;
+		llenadoCompleto := TRUE;
+	 END_IF
+END_IF
+
+
+
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="llenadoBarril">
+      <LineId Id="85" Count="1" />
+      <LineId Id="78" Count="0" />
+      <LineId Id="194" Count="0" />
+      <LineId Id="182" Count="0" />
+      <LineId Id="184" Count="0" />
+      <LineId Id="186" Count="0" />
+      <LineId Id="197" Count="0" />
+      <LineId Id="183" Count="0" />
+      <LineId Id="192" Count="0" />
+      <LineId Id="190" Count="0" />
+      <LineId Id="193" Count="0" />
+      <LineId Id="196" Count="0" />
+      <LineId Id="158" Count="0" />
+      <LineId Id="204" Count="0" />
+      <LineId Id="195" Count="0" />
+      <LineId Id="199" Count="1" />
+      <LineId Id="202" Count="0" />
+      <LineId Id="205" Count="1" />
+      <LineId Id="203" Count="0" />
+      <LineId Id="201" Count="0" />
+      <LineId Id="159" Count="22" />
+      <LineId Id="157" Count="0" />
+      <LineId Id="44" Count="2" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
