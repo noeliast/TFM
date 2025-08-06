@@ -24,6 +24,7 @@ Estado: INT := 0; // 0: Espera | 1: Descargando | 2: Post-descarga
 	InicioLLenado: BOOL := TRUE;
 	VienesDeDescarga: BOOL;
 	primeraVez: BOOL;
+	numDescargas: INT;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -34,7 +35,7 @@ IF GVL_Inputs.Start_Button THEN
 END_IF
 
 // Control inicial llenado tanque
-Timer_Llenado(IN := InicioLLenado, PT := T#30s);
+Timer_Llenado(IN := InicioLLenado, PT := T#35S);
 IF NOT Timer_Llenado.Q and InicioLLenado THEN
     GVL_Inputs.Fill_Valve := TRUE;           // Abrir valvula llenado
 ELSE
@@ -74,7 +75,7 @@ Sensor_Anterior := GVL_Inputs.Sensor_Tanque_Salida;
     // Máquina de estados
     CASE Estado OF
 
-        // 🟢 Estado 0: Esperando objeto en la boca del tanque
+        // Estado 0: Esperando objeto en la boca del tanque
         0:
             GVL_Inputs.Cinta_Entrada := TRUE;
             GVL_Inputs.Cinta_Tanque  := TRUE;
@@ -86,28 +87,44 @@ Sensor_Anterior := GVL_Inputs.Sensor_Tanque_Salida;
                 Estado := 1;
             END_IF
 
-        // 🟡 Estado 1: Descargando (2 segundos)
+        //  Estado 1: Descargando (2 segundos)
         1:
             GVL_Inputs.Cinta_Entrada := FALSE;
             GVL_Inputs.Cinta_Tanque  := FALSE;
             GVL_Inputs.Cinta_Salida  := FALSE;
             GVL_Inputs.Discharge_Valve := TRUE;
+			
+			
 
             Timer_Descarga(IN := TRUE, PT := T#2s);
 
             IF Timer_Descarga.Q THEN
                 Timer_Descarga(IN := FALSE); // Detener timer
+				numDescargas := numDescargas + 1;
                 Estado := 2;
             END_IF
 
-        // 🔵 Estado 2: Post-descarga - reactivar cintas
+        // Estado 2: Post-descarga - reactivar cintas
         2:
-            GVL_Inputs.Discharge_Valve := FALSE;
-            GVL_Inputs.Cinta_Entrada := TRUE;
-            GVL_Inputs.Cinta_Tanque  := TRUE;
-            GVL_Inputs.Cinta_Salida  := TRUE;
+			IF numDescargas < 15 THEN
+				GVL_Inputs.Discharge_Valve := FALSE;
+				GVL_Inputs.Cinta_Entrada := TRUE;
+				GVL_Inputs.Cinta_Tanque  := TRUE;
+				GVL_Inputs.Cinta_Salida  := TRUE;
 
             Estado := 0; // Volver a esperar nuevo objeto
+			ELSE
+				GVL_Inputs.Discharge_Valve := FALSE;
+				GVL_Inputs.Cinta_Entrada := FALSE;
+				GVL_Inputs.Cinta_Tanque  := FALSE;
+				GVL_Inputs.Cinta_Salida  := FALSE;
+				InicioLLenado := TRUE;
+				numDescargas := 0;
+				Estado := 0; // Volver a esperar nuevo objeto
+			END_IF
+			
+		
+            
     END_CASE
 
     // Flanco de bajada inicia la descarga
@@ -169,7 +186,24 @@ END_IF
     </Implementation>
     <LineIds Name="MAIN">
       <LineId Id="1314" Count="41" />
-      <LineId Id="1413" Count="38" />
+      <LineId Id="1413" Count="22" />
+      <LineId Id="1476" Count="1" />
+      <LineId Id="1436" Count="4" />
+      <LineId Id="1505" Count="0" />
+      <LineId Id="1441" Count="4" />
+      <LineId Id="1479" Count="0" />
+      <LineId Id="1482" Count="4" />
+      <LineId Id="1480" Count="0" />
+      <LineId Id="1500" Count="0" />
+      <LineId Id="1503" Count="0" />
+      <LineId Id="1501" Count="1" />
+      <LineId Id="1489" Count="1" />
+      <LineId Id="1506" Count="0" />
+      <LineId Id="1504" Count="0" />
+      <LineId Id="1481" Count="0" />
+      <LineId Id="1487" Count="0" />
+      <LineId Id="1496" Count="0" />
+      <LineId Id="1451" Count="0" />
       <LineId Id="1412" Count="0" />
       <LineId Id="1356" Count="55" />
       <LineId Id="104" Count="0" />
