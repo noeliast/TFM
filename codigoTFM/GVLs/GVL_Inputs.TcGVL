@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <GVL Name="GVL_Inputs" Id="{ca376030-35fc-47e3-8a5c-b49e10676147}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+
+	{attribute 'OPC.UA.DA' := '1'}
+	bStart  : BOOL; // Boton de start cuadro
+	
+	{attribute 'OPC.UA.DA' := '1'}
+	bStop  : BOOL; // Boton de stop cuadro
+	
+	{attribute 'OPC.UA.DA' := '1'}
+    setaEmergencia  : BOOL; // Seta emergencia cuadro
+
+    {attribute 'OPC.UA.DA' := '1'}
+	sensorDifuso1 : BOOL; // Sensor difuso 1
+
+	{attribute 'OPC.UA.DA' := '1'}
+	sensorDifuso2 : BOOL; // Sensor difuso 2
+	
+	{attribute 'OPC.UA.DA' := '1'}
+	sensorDifus3 : BOOL; // Sensor difuso 3
+	
+	{attribute 'OPC.UA.DA' := '1'}
+	sensorDifuso4 : BOOL; // Sensor difuso 4
+	
+	
+END_VAR
+
+VAR_GLOBAL CONSTANT
+	
+	//numero de sensores
+    numSensores : INT := 4;
+	
+
+END_VAR
+
+]]></Declaration>
+  </GVL>
+</TcPlcObject>
