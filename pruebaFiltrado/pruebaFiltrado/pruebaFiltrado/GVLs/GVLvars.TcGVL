@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <GVL Name="GVLvars" Id="{d6bfcba1-ae83-402d-aad6-49aebae6c93b}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	// Cuadro
+	{attribute 'OPC.UA.DA' := '1'}
+	botonStart : BOOL;
+	
+	// Cintas
+	{attribute 'OPC.UA.DA' := '1'}
+	cintaVision : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	cintaRemoveVision : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	cintaBascula : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	cintaPostBascula : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	cintaRemoveBascula : BOOL;
+
+	// Sensores
+	{attribute 'OPC.UA.DA' := '1'}
+	pesoBascula : REAL;
+	{attribute 'OPC.UA.DA' := '1'}
+ 	sDifusoRemoveVision : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	sDifusoRemovePeso : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	sDifusoVision : BOOL;
+ 	{attribute 'OPC.UA.DA' := '1'}
+	sDifusoBascula : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	sDifusoPostBascula : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+ 	sCilindroVision : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+ 	sCilindroBascula : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	sVision : INT;
+	
+	
+	// Cilindros
+	{attribute 'OPC.UA.DA' := '1'}
+	sCilindroVisionDelantero : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	sCilindroVisionPosterior : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	sCilindroBasculaDelantero : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	sCilindroBasculaPosterior : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+ 	cilindroVision : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+ 	cilindroBascula : BOOL;
+	
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

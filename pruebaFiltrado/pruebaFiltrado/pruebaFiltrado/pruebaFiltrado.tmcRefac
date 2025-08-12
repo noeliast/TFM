@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Refactors>
+  <Renames>
+    <RenamedSymbol>
+      <Type guid="d6bfcba1-ae83-402d-aad6-49aebae6c93b">GVLvars</Type>
+      <From>cDescarteVisionDelantero</From>
+      <To>sCilindroVisionDelantero</To>
+    </RenamedSymbol>
+  </Renames>
+</Refactors>
