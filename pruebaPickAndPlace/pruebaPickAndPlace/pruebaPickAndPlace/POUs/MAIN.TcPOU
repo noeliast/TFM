@@ -68,10 +68,17 @@ IF enclaveStart THEN
 			// EBERIA SER CON FLANCOS
 			// si esta comletamnte extentida horizontalmente -> siguiente estao
 			IF NOT GVL_Var.PickPlace_MovingXY THEN
+				timerMovimiento(IN:=TRUE, PT:=T#2S);
+				IF timerMovimiento.Q THEN
+//				GVL_Var.PickPlace_MoverZ := FALSE;
+				timerMovimiento(IN:=FALSE);
+	
 				EstadoPickPlace := 2;
 			END_IF
+				
+			END_IF
 	
-		2: // Bajamos la ventosa
+		2: // Bajamos vertical
 			GVL_Var.PickPlace_MoverZ := TRUE; //desplargar vertical
 			GVL_Var.PickPlace_MoverX := TRUE; // esplagamos horizontal
 			GVL_Var.PickPlace_Agarrar := FALSE; // ventosa
@@ -120,6 +127,8 @@ IF enclaveStart THEN
 			GVL_Var.PickPlace_MoverZ := FALSE;  
 			GVL_Var.PickPlace_MoverX := FALSE;
 			GVL_Var.PickPlace_Agarrar := TRUE;
+			
+			GVL_Var.cerrarAbrazaderaBase := FALSE;
 	
 
 			IF NOT GVL_Var.PickPlace_MovingXY THEN
@@ -227,7 +236,10 @@ GVL_Var.cintaTapas := cintaTapa;
       <LineId Id="279" Count="34" />
       <LineId Id="418" Count="1" />
       <LineId Id="423" Count="0" />
-      <LineId Id="420" Count="2" />
+      <LineId Id="420" Count="0" />
+      <LineId Id="545" Count="5" />
+      <LineId Id="544" Count="0" />
+      <LineId Id="421" Count="1" />
       <LineId Id="325" Count="1" />
       <LineId Id="424" Count="1" />
       <LineId Id="327" Count="0" />
@@ -248,6 +260,8 @@ GVL_Var.cintaTapas := cintaTapa;
       <LineId Id="359" Count="1" />
       <LineId Id="440" Count="1" />
       <LineId Id="361" Count="0" />
+      <LineId Id="543" Count="0" />
+      <LineId Id="542" Count="0" />
       <LineId Id="363" Count="0" />
       <LineId Id="370" Count="0" />
       <LineId Id="456" Count="0" />
