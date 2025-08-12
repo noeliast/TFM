@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <GVL Name="GVL_Var" Id="{b38c3178-7f30-4b50-90fb-76531ebc4cba}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	
+	// Barra Posicionamiento Bases
+	{attribute 'OPC.UA.DA' := '1'}
+	cerrarAbrazaderaBase : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	levantarAbrazaderaBase : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	limiteSujeccionBase : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	limiteVerticalBase : BOOL;
+	
+	// Barra posicionamiento Tapas
+ 	{attribute 'OPC.UA.DA' := '1'}
+	levantarAbrazaderaTapa : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	cerrarAbrazaderaTapa : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	limiteSujeccionTapa : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	limiteVerticalTapa : BOOL;
+ 
+	// Sensores
+	{attribute 'OPC.UA.DA' := '1'}
+	sensorFotoBase : BOOL;;
+	{attribute 'OPC.UA.DA' := '1'}
+	sensorFotoTapa : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	sensorPostSellado : BOOL;
+	
+	// Pick & Place
+	{attribute 'OPC.UA.DA' := '1'}
+	pickAndPlace : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	PickPlace_MoverX : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	PickPlace_MoverZ : BOOL;
+//	ppRotarH : BOOL;
+//	ppRotarAH : BOOL;
+//	ppRotarPinzaH: BOOL;
+//	ppRotarPinzaAH : BOOL;
+//	ppVentosa : BOOL;
+{attribute 'OPC.UA.DA' := '1'}
+	PickPlace_Agarrar : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	PickPlace_Detectado : BOOL;
+	//sensores
+	// ...
+	{attribute 'OPC.UA.DA' := '1'}
+	ppObjeto : BOOL;
+	
+	
+	// Cintas
+	{attribute 'OPC.UA.DA' := '1'}
+	cintaBases : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	cintaTapas : BOOL;
+	
+	// Botones cuadro
+	{attribute 'OPC.UA.DA' := '1'}
+	botonStart : BOOL;
+ {attribute 'OPC.UA.DA' := '1'}
+	PickPlace_MovingXY: BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	PickPlace_MovingZ: bool; 
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>
