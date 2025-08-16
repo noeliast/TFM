@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <POU Name="MAIN" Id="{33819508-742b-4c1e-88e6-5bd373dd68ab}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	enclaveStart: BOOL;
+	timerColumna: TON;
+	posicionEst : ARRAY[1..2] OF REAL;
+	distBaldas : distanciaBaldas();
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*
+clumnas 1.6 - 1
+filas 0.5-2.1
+*)
+
+
+IF GVLvar.botonStart THEN
+	enclaveStart := TRUE;
+	GVLvar.cinta := TRUE;
+	distBaldas();
+END_IF
+
+
+IF enclaveStart THEN
+	
+	//si hay una caja en la enrada apr almacenar se prepara la grua
+	IF GVLvar.sensorEntradaGrua THEN
+		GVLvar.cinta := FALSE;
+		posicionEst := posicionEstanteria();
+		GVLvar.setPointX := posicionEst[1];
+		GVLvar.setPointZ := posicionEst[2];
+		//flanco de bajada en la senal de movimiento
+		// xq si no se para automaticamente la grua al apsar al else
+	ELSE
+		GVLvar.setPointX := 0.0;
+		GVLvar.setPointZ := 0.0;
+	END_IF
+	
+	
+END_IF
+
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN">
+      <LineId Id="35" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="36" Count="1" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="6" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="57" Count="1" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="18" Count="1" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="45" Count="1" />
+      <LineId Id="91" Count="1" />
+      <LineId Id="47" Count="2" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="20" Count="1" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="10" Count="1" />
+      <LineId Id="8" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
