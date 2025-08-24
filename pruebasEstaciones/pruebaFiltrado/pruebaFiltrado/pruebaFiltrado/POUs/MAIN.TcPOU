@@ -10,6 +10,7 @@ VAR
 	cintaRemoveBascula: BOOL;
 	cintaVision: BOOL;
 	timerVision: TON;
+	cintaBasculaPositivo:bool;
 	
 	descarteXcolor: BOOL;
 	cilindroVision: BOOL;
@@ -18,6 +19,12 @@ VAR
 	descarteXpeso: BOOL;
 	cilindroBascula: BOOL;
 	cintaDescarteBascula: BOOL;
+	startTimerVision: BOOL;
+	cintaBasculaNegativo: BOOL;
+	difusoVisionAnt: bool;
+	descartando: BOOL;
+	flancAnteriorCilindroVision : F_TRIG;
+	flancoCintaDescarte : R_TRIG;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -65,61 +72,84 @@ IF enclaveStart THEN
 	
 // ------------------- PASO 2 - Filtro Vision -------------------
 
-	IF GVLvars.sDifusoVision THEN
-		cintaVision := FALSE; // Se para la cinta
-		timerVision(IN:=TRUE, PT:=T#2S);
-			IF timerVision.Q THEN
-				timerVision(IN:=FALSE);
-				// Si es color azul o metalica continua 
-				IF GVLvars.sVision = 3 OR GVLvars.sVision = 9 THEN
-					descarteXcolor := FALSE;
-				// Se descarta la base
-				ELSE
-					descarteXcolor := TRUE;
-				END_IF
-				cintaVision := TRUE; // Reanuda la marcha
-				// Si hay que descratar y se detecta objeto delante del cilindro
-				IF descarteXcolor AND GVLvars.sCilindroVision THEN
-					cintaVision := FALSE;
-					cilindroVision := TRUE;
-					cintaDescarteVision := TRUE;
-					// si e objeto ya esta en la cinta de descarte se reanuda con la de vision
-					IF GVLvars.cintaRemoveVision THEN
-						cintaVision := TRUE;
-					END_IF
-				END_IF
-			END_IF
+// Detectar flanco ascendente solo una vez por detección
+IF GVLvars.sDifusoVision AND NOT difusoVisionAnt THEN
+    startTimerVision := TRUE;  // Arranca el temporizador solo una vez por evento
+	cintaVision := FALSE; // Se para la cinta
+END_IF
+difusoVisionAnt := GVLvars.sDifusoVision;
+	
+	//IF GVLvars.sDifusoVision THEN
+	//cintaVision := FALSE; // Se para la cinta
+	//startTimerVision := TRUE;
+	timerVision(IN:=startTimerVision, PT:=T#2S);
+	IF timerVision.Q THEN
+		startTimerVision:=FALSE;
+		// Si es color azul o metalica continua 
+		IF GVLvars.sVision = 3 OR GVLvars.sVision = 9 THEN
+			descarteXcolor := FALSE;
+		// Se descarta la base
+		ELSE
+			descarteXcolor := TRUE;
+		END_IF
+		cintaVision := TRUE; // Reanuda la marcha
+		
 	END_IF
 	
+	// Si hay que descratar y se detecta objeto delante del cilindro
+	IF descarteXcolor AND GVLvars.sCilindroVision THEN
+		descartando := TRUE;
+		
+	END_IF
+	
+	flancAnteriorCilindroVision(CLK := GVLvars.sCilindroVision);
+	flancoCintaDescarte(CLK := GVLvars.sDifusoRemoveVision);
+	
+	// Si tenemos que descartar y el objeto para el sensor (se situa el objeto en frente del cilindro)
+	IF descartando = TRUE  AND flancAnteriorCilindroVision.Q THEN
+		cintaVision := FALSE;
+		cilindroVision := TRUE;
+		cintaDescarteVision := TRUE;
+		// si e objeto ya esta en la cinta de descarte se reanuda con la de vision
+		IF GVLvars.sCilindroVisionDelantero THEN
+			cintaVision := TRUE;
+			cilindroVision := FALSE;	
+			descartando := FALSE;
+			
+		END_IF
+	END_IF
+	
+	//END_IF
+
 	
 // ------------------ PASO 3 - Filtro peso -------------------
-
-	IF GVLvars.sDifusoBascula THEN
-		cintaBascula := FALSE; // Se para la cinta
-		timerBascula(IN:=TRUE, PT:=T#2S);
-			IF timerVision.Q THEN
-				timerBascula(IN:=FALSE);
-				// Si es color azul o metalica continua 
-				IF GVLvars.pesoBascula > 8 THEN
-					descarteXpeso := TRUE;
-				// Se descarta la base
-				ELSE
-					descarteXpeso:= FALSE;
-				END_IF
-				cintaBascula := TRUE; // Reanuda la marcha
-				// Si hay que descratar y se detecta objeto delante del cilindro
-				IF descarteXpeso AND GVLvars.sCilindroBascula THEN
-					cintaBascula := FALSE;
-					cilindroBascula := TRUE;
-					cintaDescarteBascula := TRUE;
-					// si e objeto ya esta en la cinta de descarte se reanuda con la de vision
-					// ANADIR LIMTES CILINDRO
-					IF GVLvars.cintaRemoveBascula THEN
-						cintaBascula := TRUE;
-					END_IF
-				END_IF
-			END_IF
-	END_IF
+cintaBascula := TRUE;
+//	IF GVLvars.sDifusoBascula THEN
+//		cintaBascula := FALSE; // Se para la cinta
+//		timerBascula(IN:=TRUE, PT:=T#2S);
+//			IF timerBascula.Q THEN
+//				timerBascula(IN:=FALSE);
+//				// Si es color azul o metalica continua 
+//				IF GVLvars.pesoBascula > 8 THEN
+//					descarteXpeso := TRUE;
+//				// Se descarta la base
+//				ELSE
+//					descarteXpeso:= FALSE;
+//				END_IF
+//				cintaBascula := TRUE; // Reanuda la marcha
+//				// Si hay que descratar y se detecta objeto delante del cilindro
+//				IF descarteXpeso AND GVLvars.sCilindroBascula THEN
+//					cintaBascula := FALSE;
+//					cilindroBascula := TRUE;
+//					cintaDescarteBascula := TRUE;
+//					// si e objeto ya esta en la cinta de descarte se reanuda con la de vision
+//					// ANADIR LIMTES CILINDRO
+//					IF GVLvars.cintaRemoveBascula THEN
+//						cintaBascula := TRUE;
+//					END_IF
+//				END_IF
+//			END_IF
+//	END_IF
 
 END_IF
 
@@ -139,75 +169,11 @@ GVLvars.cilindroVision := cilindroVision;
 ]]></ST>
     </Implementation>
     <LineIds Name="MAIN">
-      <LineId Id="2" Count="0" />
-      <LineId Id="17" Count="0" />
-      <LineId Id="12" Count="0" />
-      <LineId Id="19" Count="0" />
-      <LineId Id="18" Count="0" />
-      <LineId Id="20" Count="2" />
-      <LineId Id="93" Count="1" />
-      <LineId Id="92" Count="0" />
-      <LineId Id="23" Count="2" />
-      <LineId Id="27" Count="1" />
-      <LineId Id="15" Count="0" />
-      <LineId Id="29" Count="1" />
-      <LineId Id="152" Count="1" />
-      <LineId Id="31" Count="1" />
-      <LineId Id="62" Count="0" />
-      <LineId Id="16" Count="0" />
-      <LineId Id="63" Count="0" />
-      <LineId Id="11" Count="0" />
-      <LineId Id="35" Count="0" />
-      <LineId Id="34" Count="0" />
-      <LineId Id="157" Count="0" />
-      <LineId Id="33" Count="0" />
-      <LineId Id="38" Count="0" />
-      <LineId Id="41" Count="1" />
-      <LineId Id="44" Count="0" />
-      <LineId Id="46" Count="0" />
-      <LineId Id="53" Count="0" />
-      <LineId Id="37" Count="0" />
-      <LineId Id="7" Count="0" />
-      <LineId Id="69" Count="1" />
-      <LineId Id="72" Count="0" />
-      <LineId Id="156" Count="0" />
-      <LineId Id="158" Count="0" />
-      <LineId Id="75" Count="1" />
-      <LineId Id="84" Count="1" />
-      <LineId Id="87" Count="0" />
-      <LineId Id="102" Count="0" />
-      <LineId Id="95" Count="1" />
-      <LineId Id="103" Count="0" />
-      <LineId Id="98" Count="0" />
-      <LineId Id="100" Count="0" />
-      <LineId Id="97" Count="0" />
-      <LineId Id="106" Count="0" />
-      <LineId Id="110" Count="0" />
-      <LineId Id="107" Count="1" />
-      <LineId Id="111" Count="1" />
-      <LineId Id="115" Count="0" />
-      <LineId Id="117" Count="2" />
-      <LineId Id="109" Count="0" />
-      <LineId Id="83" Count="0" />
-      <LineId Id="77" Count="0" />
-      <LineId Id="120" Count="0" />
-      <LineId Id="104" Count="1" />
-      <LineId Id="159" Count="0" />
-      <LineId Id="122" Count="18" />
-      <LineId Id="148" Count="0" />
-      <LineId Id="141" Count="4" />
-      <LineId Id="121" Count="0" />
-      <LineId Id="74" Count="0" />
-      <LineId Id="73" Count="0" />
-      <LineId Id="71" Count="0" />
-      <LineId Id="8" Count="1" />
-      <LineId Id="160" Count="0" />
-      <LineId Id="155" Count="0" />
-      <LineId Id="64" Count="4" />
-      <LineId Id="161" Count="0" />
-      <LineId Id="154" Count="0" />
-      <LineId Id="10" Count="0" />
-      <LineId Id="162" Count="0" />
+      <LineId Id="335" Count="75" />
+      <LineId Id="472" Count="0" />
+      <LineId Id="411" Count="9" />
+      <LineId Id="471" Count="0" />
+      <LineId Id="421" Count="49" />
       <LineId Id="6" Count="0" />
     </LineIds>
   </POU>

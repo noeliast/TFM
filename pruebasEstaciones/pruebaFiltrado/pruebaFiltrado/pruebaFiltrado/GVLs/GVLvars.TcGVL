@@ -13,11 +13,15 @@ VAR_GLOBAL
 	{attribute 'OPC.UA.DA' := '1'}
 	cintaRemoveVision : BOOL;
 	{attribute 'OPC.UA.DA' := '1'}
-	cintaBascula : BOOL;
+	cintaBasculaPositive : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	cintaBasculaNegative : BOOL;
 	{attribute 'OPC.UA.DA' := '1'}
 	cintaPostBascula : BOOL;
 	{attribute 'OPC.UA.DA' := '1'}
 	cintaRemoveBascula : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	cintaBascula : bool;
 
 	// Sensores
 	{attribute 'OPC.UA.DA' := '1'}
@@ -37,7 +41,7 @@ VAR_GLOBAL
 	{attribute 'OPC.UA.DA' := '1'}
  	sCilindroBascula : BOOL;
 	{attribute 'OPC.UA.DA' := '1'}
-	sVision : INT;
+	sVision : DINT;
 	
 	
 	// Cilindros
