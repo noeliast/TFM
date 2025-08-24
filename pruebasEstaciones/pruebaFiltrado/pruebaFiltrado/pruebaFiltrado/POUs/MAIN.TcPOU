@@ -25,6 +25,10 @@ VAR
 	descartando: BOOL;
 	flancAnteriorCilindroVision : F_TRIG;
 	flancoCintaDescarte : R_TRIG;
+	descratandoXpeso: BOOL;
+	startTimerBascula: BOOL;
+	flancoCintaDescarteBascula: F_TRIG;
+	flancAnteriorCilindroBascula: F_TRIG;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -89,8 +93,8 @@ difusoVisionAnt := GVLvars.sDifusoVision;
 		IF GVLvars.sVision = 3 OR GVLvars.sVision = 9 THEN
 			descarteXcolor := FALSE;
 		// Se descarta la base
-		ELSE
-			descarteXcolor := TRUE;
+//		ELSE
+//			descarteXcolor := TRUE;
 		END_IF
 		cintaVision := TRUE; // Reanuda la marcha
 		
@@ -119,39 +123,55 @@ difusoVisionAnt := GVLvars.sDifusoVision;
 		END_IF
 	END_IF
 	
-	//END_IF
+END_IF
 
 	
 // ------------------ PASO 3 - Filtro peso -------------------
-cintaBascula := TRUE;
-//	IF GVLvars.sDifusoBascula THEN
-//		cintaBascula := FALSE; // Se para la cinta
-//		timerBascula(IN:=TRUE, PT:=T#2S);
-//			IF timerBascula.Q THEN
-//				timerBascula(IN:=FALSE);
-//				// Si es color azul o metalica continua 
-//				IF GVLvars.pesoBascula > 8 THEN
-//					descarteXpeso := TRUE;
-//				// Se descarta la base
-//				ELSE
-//					descarteXpeso:= FALSE;
-//				END_IF
-//				cintaBascula := TRUE; // Reanuda la marcha
-//				// Si hay que descratar y se detecta objeto delante del cilindro
-//				IF descarteXpeso AND GVLvars.sCilindroBascula THEN
-//					cintaBascula := FALSE;
-//					cilindroBascula := TRUE;
-//					cintaDescarteBascula := TRUE;
-//					// si e objeto ya esta en la cinta de descarte se reanuda con la de vision
-//					// ANADIR LIMTES CILINDRO
-//					IF GVLvars.cintaRemoveBascula THEN
-//						cintaBascula := TRUE;
-//					END_IF
-//				END_IF
-//			END_IF
-//	END_IF
 
+cintaBascula := TRUE;
+
+IF GVLvars.sDifusoBascula THEN
+	startTimerBascula := TRUE;  // Igual que el timer de vision: arranca el temporizador solo una vez
+	cintaBascula := FALSE; // Se para la cinta
 END_IF
+
+timerBascula(IN:=startTimerBascula, PT:=T#2S);
+
+IF timerBascula.Q THEN
+	startTimerBascula := FALSE;
+
+	// Si el peso es mayor de un umbral se descarta
+	IF GVLvars.pesoBascula > 4 THEN
+		descarteXpeso := TRUE;
+	ELSE
+		descarteXpeso := FALSE;
+	END_IF
+
+	cintaBascula := TRUE; // Reanuda la marcha
+	
+	// Si hay que descartar y se detecta objeto delante del cilindro
+	IF descarteXpeso AND GVLvars.sCilindroBascula THEN
+		descratandoXpeso := TRUE;
+	END_IF
+	
+	flancAnteriorCilindroBascula(CLK := GVLvars.sCilindroBascula);
+	flancoCintaDescarteBascula(CLK := GVLvars.sDifusoRemovePeso);
+
+	// Si tenemos que descartar y el objeto para el sensor
+	IF descratandoXpeso = TRUE AND flancAnteriorCilindroBascula.Q THEN
+		cintaBascula := FALSE;
+		cilindroBascula := TRUE;
+		cintaDescarteBascula := TRUE;
+		
+		// si el objeto ya está en la cinta de descarte, se reanuda la cinta bascula
+		IF GVLvars.cintaRemoveBascula THEN
+			cintaBascula := TRUE;
+			cilindroBascula := FALSE;
+			descratandoXpeso := FALSE;
+		END_IF
+	END_IF
+END_IF
+
 
 
 // ----------------- PASO 4 ------------------
@@ -173,7 +193,10 @@ GVLvars.cilindroVision := cilindroVision;
       <LineId Id="472" Count="0" />
       <LineId Id="411" Count="9" />
       <LineId Id="471" Count="0" />
-      <LineId Id="421" Count="49" />
+      <LineId Id="421" Count="6" />
+      <LineId Id="492" Count="6" />
+      <LineId Id="501" Count="36" />
+      <LineId Id="456" Count="14" />
       <LineId Id="6" Count="0" />
     </LineIds>
   </POU>

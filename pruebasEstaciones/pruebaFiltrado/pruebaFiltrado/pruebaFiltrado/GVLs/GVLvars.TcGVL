@@ -58,6 +58,7 @@ VAR_GLOBAL
 	{attribute 'OPC.UA.DA' := '1'}
  	cilindroBascula : BOOL;
 	
+	
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>
