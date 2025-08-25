@@ -18,6 +18,9 @@ VAR
 	EstadoPickPlace: INT;
 	timerMovimiento: TON;
 	tiempoMovimiento: TIME;
+	
+	flancoTapa : F_TRIG;
+	flancoBase : F_TRIG;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -28,9 +31,14 @@ IF GVL_Var.botonStart THEN
 	cintaTapa := TRUE;
 END_IF
 
+
+
 IF enclaveStart THEN
+	flancoTapa(CLK:=GVL_Var.sensorFotoTapa);
+	flancoBase(CLK:= GVL_Var.sensorFotoBase);
+	
 	// Base en barrera posicionadora
-	IF  GVL_Var.sensorFotoBase THEN
+	IF  flancoBase.Q THEN
 		baseOK := TRUE;
 		cintaBase := FALSE;
 		
@@ -38,7 +46,7 @@ IF enclaveStart THEN
 	END_IF
 	
 	// Tapa en barrera posiconadora
-	IF  GVL_Var.sensorFotoTapa THEN
+	IF flancoTapa.Q THEN
 		tapaOK := TRUE;
 		cintaTapa := FALSE;
 		GVL_Var.cerrarAbrazaderaTapa := TRUE;
@@ -128,7 +136,7 @@ IF enclaveStart THEN
 			GVL_Var.PickPlace_MoverX := FALSE;
 			GVL_Var.PickPlace_Agarrar := TRUE;
 			
-			GVL_Var.cerrarAbrazaderaBase := FALSE;
+			//GVL_Var.cerrarAbrazaderaBase := FALSE;
 	
 
 			IF NOT GVL_Var.PickPlace_MovingXY THEN
@@ -138,7 +146,7 @@ IF enclaveStart THEN
 //				GVL_Var.PickPlace_MoverZ := FALSE;
 				timerMovimiento(IN:=FALSE);
 				EstadoPickPlace := 6;
-				//EstadoPickPlace := 4;
+				
 			END_IF
 					
 			END_IF
@@ -168,25 +176,16 @@ IF enclaveStart THEN
 			GVL_Var.PickPlace_MoverX := FALSE;
 			GVL_Var.PickPlace_Agarrar := FALSE;
 	
-				// Reiniciar variables y continuar producción
-				estadoPickPlace := 8;
-			//END_IF
+			// Reiniciar variables y continuar producción
+			estadoPickPlace := 8;
+			
 			
 		8:
 			GVL_Var.PickPlace_MoverZ := FALSE;  
 			GVL_Var.PickPlace_MoverX := FALSE;
 			GVL_Var.PickPlace_Agarrar := FALSE;
 			
-			IF NOT GVL_Var.PickPlace_MovingZ THEN
-//					baseOK := FALSE;
-//					tapaOK := FALSE;
-		
-//					GVL_Var.cerrarAbrazaderaBase := FALSE;
-//					GVL_Var.cerrarAbrazaderaTapa := FALSE;
-		
-//					cintaBase := TRUE;
-//					cintaTapa := TRUE;
-		
+			IF NOT GVL_Var.PickPlace_MovingZ THEN		
 					EstadoPickPlace := 9;
 			END_IF
 			
@@ -200,12 +199,12 @@ IF enclaveStart THEN
 			IF GVL_Var.sensorPostSellado THEN
 				GVL_Var.levantarAbrazaderaTapa := FALSE;
 				baseOK := FALSE;
-					tapaOK := FALSE;
-		
-					GVL_Var.cerrarAbrazaderaBase := FALSE;
-					GVL_Var.cerrarAbrazaderaTapa := FALSE;
-		
-					EstadoPickPlace := 0;
+				tapaOK := FALSE;
+	
+				GVL_Var.cerrarAbrazaderaBase := FALSE;
+				GVL_Var.cerrarAbrazaderaTapa := FALSE;
+	
+				EstadoPickPlace := 0;
 			END_IF
 	
 	ELSE
@@ -232,7 +231,10 @@ GVL_Var.cintaTapas := cintaTapa;
       <LineId Id="16" Count="0" />
       <LineId Id="21" Count="0" />
       <LineId Id="11" Count="0" />
+      <LineId Id="572" Count="0" />
+      <LineId Id="574" Count="0" />
       <LineId Id="275" Count="1" />
+      <LineId Id="575" Count="2" />
       <LineId Id="279" Count="34" />
       <LineId Id="418" Count="1" />
       <LineId Id="423" Count="0" />
@@ -288,9 +290,7 @@ GVL_Var.cintaTapas := cintaTapa;
       <LineId Id="452" Count="1" />
       <LineId Id="451" Count="0" />
       <LineId Id="463" Count="0" />
-      <LineId Id="465" Count="0" />
-      <LineId Id="467" Count="8" />
-      <LineId Id="466" Count="0" />
+      <LineId Id="465" Count="1" />
       <LineId Id="464" Count="0" />
       <LineId Id="501" Count="1" />
       <LineId Id="504" Count="0" />

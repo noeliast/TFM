@@ -15,7 +15,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{10255D57-7FDD-4021-B6E2-450B493D79C8}" Name="pruebaPickAndPlace" PrjFilePath="pruebaPickAndPlace\pruebaPickAndPlace.plcproj" TmcFilePath="pruebaPickAndPlace\pruebaPickAndPlace.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" CopyTmcToTarget="true" CopyTpyToTarget="false" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="pruebaPickAndPlace\pruebaPickAndPlace.tmc" TmcHash="{CC77AB29-E06C-8CC7-2D45-35239DE4E50D}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="pruebaPickAndPlace\pruebaPickAndPlace.tmc" TmcHash="{4D1DAE16-F0DF-D048-07A7-FED3B08B7B31}">
 					<Name>pruebaPickAndPlace Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Contexts>
