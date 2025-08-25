@@ -76,13 +76,13 @@ IF enclaveStart THEN
 	
 // ------------------- PASO 2 - Filtro Vision -------------------
 
-// Detectar flanco ascendente solo una vez por detección
-IF GVLvars.sDifusoVision AND NOT difusoVisionAnt THEN
-    startTimerVision := TRUE;  // Arranca el temporizador solo una vez por evento
-	cintaVision := FALSE; // Se para la cinta
-END_IF
-difusoVisionAnt := GVLvars.sDifusoVision;
-	
+	// Detectar flanco ascendente solo una vez por detección
+	IF GVLvars.sDifusoVision AND NOT difusoVisionAnt THEN
+		startTimerVision := TRUE;  // Arranca el temporizador solo una vez por evento
+		cintaVision := FALSE; // Se para la cinta
+	END_IF
+	difusoVisionAnt := GVLvars.sDifusoVision;
+		
 	//IF GVLvars.sDifusoVision THEN
 	//cintaVision := FALSE; // Se para la cinta
 	//startTimerVision := TRUE;
@@ -93,8 +93,8 @@ difusoVisionAnt := GVLvars.sDifusoVision;
 		IF GVLvars.sVision = 3 OR GVLvars.sVision = 9 THEN
 			descarteXcolor := FALSE;
 		// Se descarta la base
-//		ELSE
-//			descarteXcolor := TRUE;
+		ELSE
+			descarteXcolor := TRUE;
 		END_IF
 		cintaVision := TRUE; // Reanuda la marcha
 		
@@ -114,64 +114,68 @@ difusoVisionAnt := GVLvars.sDifusoVision;
 		cintaVision := FALSE;
 		cilindroVision := TRUE;
 		cintaDescarteVision := TRUE;
-		// si e objeto ya esta en la cinta de descarte se reanuda con la de vision
-		IF GVLvars.sCilindroVisionDelantero THEN
-			cintaVision := TRUE;
-			cilindroVision := FALSE;	
-			descartando := FALSE;
-			
-		END_IF
 	END_IF
 	
-END_IF
+	// si e objeto ya esta en la cinta de descarte se reanuda con la de vision
+	IF GVLvars.sCilindroVisionDelantero THEN
+		cintaVision := TRUE;
+		cilindroVision := FALSE;	
+		descartando := FALSE;
+		
+	END_IF
 
+	
 	
 // ------------------ PASO 3 - Filtro peso -------------------
 
-cintaBascula := TRUE;
-
-IF GVLvars.sDifusoBascula THEN
-	startTimerBascula := TRUE;  // Igual que el timer de vision: arranca el temporizador solo una vez
-	cintaBascula := FALSE; // Se para la cinta
-END_IF
-
-timerBascula(IN:=startTimerBascula, PT:=T#2S);
-
-IF timerBascula.Q THEN
-	startTimerBascula := FALSE;
-
-	// Si el peso es mayor de un umbral se descarta
-	IF GVLvars.pesoBascula > 4 THEN
-		descarteXpeso := TRUE;
-	ELSE
-		descarteXpeso := FALSE;
-	END_IF
-
-	cintaBascula := TRUE; // Reanuda la marcha
+	cintaBascula := TRUE;
 	
+	IF GVLvars.sDifusoBascula THEN
+		startTimerBascula := TRUE;  // Igual que el timer de vision: arranca el temporizador solo una vez
+		cintaBascula := FALSE; // Se para la cinta
+	END_IF
+	
+	timerBascula(IN:=startTimerBascula, PT:=T#2S);
+	
+	IF timerBascula.Q THEN
+		startTimerBascula := FALSE;
+	
+		// Si el peso es mayor de un umbral se descarta
+		IF GVLvars.pesoBascula > 4 THEN
+			descarteXpeso := TRUE;
+		ELSE
+			descarteXpeso := FALSE;
+		END_IF
+	
+		cintaBascula := TRUE; // Reanuda la marcha
+	END_IF
+		
 	// Si hay que descartar y se detecta objeto delante del cilindro
 	IF descarteXpeso AND GVLvars.sCilindroBascula THEN
 		descratandoXpeso := TRUE;
 	END_IF
 	
-	flancAnteriorCilindroBascula(CLK := GVLvars.sCilindroBascula);
+	//flancAnteriorCilindroBascula(CLK := GVLvars.sCilindroBascula);
 	flancoCintaDescarteBascula(CLK := GVLvars.sDifusoRemovePeso);
-
+	
 	// Si tenemos que descartar y el objeto para el sensor
-	IF descratandoXpeso = TRUE AND flancAnteriorCilindroBascula.Q THEN
+	IF descratandoXpeso = TRUE AND GVLvars.sCilindroBascula THEN
 		cintaBascula := FALSE;
 		cilindroBascula := TRUE;
 		cintaDescarteBascula := TRUE;
-		
-		// si el objeto ya está en la cinta de descarte, se reanuda la cinta bascula
-		IF GVLvars.cintaRemoveBascula THEN
-			cintaBascula := TRUE;
-			cilindroBascula := FALSE;
-			descratandoXpeso := FALSE;
-		END_IF
+	END_IF	
+	
+	// si el objeto ya está en la cinta de descarte, se reanuda la cinta bascula
+	IF GVLvars.sCilindroBasculaDelantero THEN
+		cintaBascula := TRUE;
+		cilindroBascula := FALSE;
+		descratandoXpeso := FALSE;
+		descarteXpeso := FALSE;
 	END_IF
-END_IF
 
+
+
+END_IF
 
 
 // ----------------- PASO 4 ------------------
@@ -191,12 +195,23 @@ GVLvars.cilindroVision := cilindroVision;
     <LineIds Name="MAIN">
       <LineId Id="335" Count="75" />
       <LineId Id="472" Count="0" />
-      <LineId Id="411" Count="9" />
+      <LineId Id="411" Count="4" />
+      <LineId Id="570" Count="1" />
+      <LineId Id="416" Count="4" />
       <LineId Id="471" Count="0" />
-      <LineId Id="421" Count="6" />
+      <LineId Id="421" Count="1" />
+      <LineId Id="425" Count="2" />
       <LineId Id="492" Count="6" />
-      <LineId Id="501" Count="36" />
-      <LineId Id="456" Count="14" />
+      <LineId Id="501" Count="13" />
+      <LineId Id="567" Count="0" />
+      <LineId Id="515" Count="14" />
+      <LineId Id="568" Count="0" />
+      <LineId Id="530" Count="4" />
+      <LineId Id="569" Count="0" />
+      <LineId Id="535" Count="1" />
+      <LineId Id="456" Count="0" />
+      <LineId Id="572" Count="1" />
+      <LineId Id="457" Count="13" />
       <LineId Id="6" Count="0" />
     </LineIds>
   </POU>
