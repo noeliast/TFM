@@ -21,6 +21,10 @@ VAR
 	
 	flancoTapa : F_TRIG;
 	flancoBase : F_TRIG;
+	luzVerde: BOOL;
+	luzNaranja: BOOL;
+	luzRojo: BOOL;
+	luzStop: BOOL;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -29,9 +33,21 @@ IF GVL_Var.botonStart THEN
 	enclaveStart := TRUE;
 	cintaBase := TRUE;
 	cintaTapa := TRUE;
+	luzVerde := TRUE;
+	luzNaranja := FALSE;
+	luzRojo := FALSE;
+	luzStop := FALSE;
 END_IF
 
-
+IF Not GVL_Var.botonStop THEN
+	luzStop := TRUE;
+	enclaveStart := FALSE;
+	cintaBase := FALSE;
+	cintaTapa := FALSE;
+	luzVerde := FALSE;
+	luzNaranja := TRUE;
+	luzRojo := FALSE;
+END_IF
 
 IF enclaveStart THEN
 	flancoTapa(CLK:=GVL_Var.sensorFotoTapa);
@@ -215,6 +231,10 @@ END_IF
 // Se actualizan las salias
 GVL_Var.cintaBases := cintaBase;
 GVL_Var.cintaTapas := cintaTapa;
+GVL_Var.luzVerticalNaranja := luzNaranja;
+GVL_Var.luzVerticalRoja := luzRojo;
+GVL_Var.luzVerticalVerde := luzVerde;
+GVL_Var.luzStop := luzStop;
 //GVL_Var.cerrarAbrazaderaBase :=
 //GVL_Var.cerrarAbrazaderaTapa
 //GVL_Var.levantarAbrazaderaBase
@@ -230,9 +250,18 @@ GVL_Var.cintaTapas := cintaTapa;
       <LineId Id="10" Count="0" />
       <LineId Id="16" Count="0" />
       <LineId Id="21" Count="0" />
+      <LineId Id="603" Count="0" />
+      <LineId Id="610" Count="1" />
+      <LineId Id="617" Count="0" />
       <LineId Id="11" Count="0" />
       <LineId Id="572" Count="0" />
       <LineId Id="574" Count="0" />
+      <LineId Id="612" Count="0" />
+      <LineId Id="599" Count="0" />
+      <LineId Id="601" Count="1" />
+      <LineId Id="605" Count="1" />
+      <LineId Id="608" Count="0" />
+      <LineId Id="600" Count="0" />
       <LineId Id="275" Count="1" />
       <LineId Id="575" Count="2" />
       <LineId Id="279" Count="34" />
@@ -307,7 +336,10 @@ GVL_Var.cintaTapas := cintaTapa;
       <LineId Id="411" Count="0" />
       <LineId Id="154" Count="0" />
       <LineId Id="34" Count="0" />
-      <LineId Id="402" Count="8" />
+      <LineId Id="402" Count="0" />
+      <LineId Id="613" Count="2" />
+      <LineId Id="618" Count="0" />
+      <LineId Id="403" Count="7" />
     </LineIds>
   </POU>
 </TcPlcObject>

@@ -33,8 +33,8 @@ VAR_GLOBAL
 	sensorPostSellado : BOOL;
 	
 	// Pick & Place
-	{attribute 'OPC.UA.DA' := '1'}
-	pickAndPlace : BOOL;
+//	{attribute 'OPC.UA.DA' := '1'}
+//	pickAndPlace : BOOL;
 	{attribute 'OPC.UA.DA' := '1'}
 	PickPlace_MoverX : BOOL;
 	{attribute 'OPC.UA.DA' := '1'}
@@ -50,8 +50,12 @@ VAR_GLOBAL
 	PickPlace_Detectado : BOOL;
 	//sensores
 	// ...
+//	{attribute 'OPC.UA.DA' := '1'}
+//	ppObjeto : BOOL;
 	{attribute 'OPC.UA.DA' := '1'}
-	ppObjeto : BOOL;
+	PickPlace_MovingXY: BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	PickPlace_MovingZ: bool; 
 	
 	
 	// Cintas
@@ -62,11 +66,27 @@ VAR_GLOBAL
 	
 	// Botones cuadro
 	{attribute 'OPC.UA.DA' := '1'}
-	botonStart : BOOL;
- {attribute 'OPC.UA.DA' := '1'}
-	PickPlace_MovingXY: BOOL;
+	 botonStart : BOOL;
 	{attribute 'OPC.UA.DA' := '1'}
-	PickPlace_MovingZ: bool; 
-END_VAR]]></Declaration>
+	 botonStop : BOOL;	
+	{attribute 'OPC.UA.DA' := '1'}
+	 luzVerticalVerde : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	 luzVerticalNaranja : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	 luzVerticalRoja : BOOL;	
+	{attribute 'OPC.UA.DA' := '1'}
+	 luzStop : BOOL; 
+ 
+
+ 
+END_VAR
+
+
+
+
+
+
+]]></Declaration>
   </GVL>
 </TcPlcObject>
