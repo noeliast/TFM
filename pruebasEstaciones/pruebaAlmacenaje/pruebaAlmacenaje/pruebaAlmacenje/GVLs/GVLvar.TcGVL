@@ -21,6 +21,7 @@ VAR_GLOBAL
 	baldasOcupadas : ARRAY [1..6,1..3] OF BOOL;
 	
 	// cintas
+	{attribute 'OPC.UA.DA' := '1'}
 	cinta : BOOL;
 	//grua
 //	{attribute 'OPC.UA.DA' := '1'}

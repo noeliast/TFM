@@ -11,33 +11,33 @@ END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[// Fila 1
-GVLvar.estanteria[1,1][1] := 1.6;  GVLvar.estanteria[1,1][2] := 0.5;
-GVLvar.estanteria[1,2][1] := 2.7;  GVLvar.estanteria[1,2][2] := 0.5;
+GVLvar.estanteria[1,1][1] := 1.5;  GVLvar.estanteria[1,1][2] := 0.5;
+GVLvar.estanteria[1,2][1] := 2.6;  GVLvar.estanteria[1,2][2] := 0.5;
 GVLvar.estanteria[1,3][1] := 3.7;  GVLvar.estanteria[1,3][2] := 0.5;
 
 // Fila 2
 GVLvar.estanteria[2,1][1] := 1.6;  GVLvar.estanteria[2,1][2] := 2.1;
-GVLvar.estanteria[2,2][1] := 2.7;  GVLvar.estanteria[2,2][2] := 2.1;
+GVLvar.estanteria[2,2][1] := 2.6;  GVLvar.estanteria[2,2][2] := 2.1;
 GVLvar.estanteria[2,3][1] := 3.7;  GVLvar.estanteria[2,3][2] := 2.1;
 
 // Fila 3
 GVLvar.estanteria[3,1][1] := 1.6;  GVLvar.estanteria[3,1][2] := 3.9;
-GVLvar.estanteria[3,2][1] := 2.7;  GVLvar.estanteria[3,2][2] := 3.9;
+GVLvar.estanteria[3,2][1] := 2.6;  GVLvar.estanteria[3,2][2] := 3.9;
 GVLvar.estanteria[3,3][1] := 3.7;  GVLvar.estanteria[3,3][2] := 3.9;
 
 // Fila 4
 GVLvar.estanteria[4,1][1] := 1.6;  GVLvar.estanteria[4,1][2] := 5.6;
-GVLvar.estanteria[4,2][1] := 2.7;  GVLvar.estanteria[4,2][2] := 5.6;
+GVLvar.estanteria[4,2][1] := 2.6;  GVLvar.estanteria[4,2][2] := 5.6;
 GVLvar.estanteria[4,3][1] := 3.7;  GVLvar.estanteria[4,3][2] := 5.6;
 
 // Fila 5
 GVLvar.estanteria[5,1][1] := 1.6;  GVLvar.estanteria[5,1][2] := 8.3;
-GVLvar.estanteria[5,2][1] := 2.7;  GVLvar.estanteria[5,2][2] := 8.3;
+GVLvar.estanteria[5,2][1] := 2.6;  GVLvar.estanteria[5,2][2] := 8.3;
 GVLvar.estanteria[5,3][1] := 3.7;  GVLvar.estanteria[5,3][2] := 8.3;
 
 // Fila 6
 GVLvar.estanteria[6,1][1] := 1.6;  GVLvar.estanteria[6,1][2] := 8.7;
-GVLvar.estanteria[6,2][1] := 2.7;  GVLvar.estanteria[6,2][2] := 8.7;
+GVLvar.estanteria[6,2][1] := 2.6;  GVLvar.estanteria[6,2][2] := 8.7;
 GVLvar.estanteria[6,3][1] := 3.7;  GVLvar.estanteria[6,3][2] := 8.7;]]></ST>
     </Implementation>
     <LineIds Name="distanciaBaldas">

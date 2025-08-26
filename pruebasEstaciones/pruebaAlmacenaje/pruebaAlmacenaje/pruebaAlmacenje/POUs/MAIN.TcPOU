@@ -7,67 +7,119 @@ VAR
 	timerColumna: TON;
 	posicionEst : ARRAY[1..2] OF REAL;
 	distBaldas : distanciaBaldas();
+	iniPosOcupEst : inicializarPosOcupEstanteria();
+	cargando: BOOL;
+	flancoMovingX : F_TRIG;
+	flancoMovingZ : F_TRIG;
+	movingZ: BOOL;
+	movingX: BOOL;
+	descragandoElem: BOOL;
+	descargandoElem: BOOL;
+	elemDescargado: BOOL;
+	state: INT := 1;
 END_VAR
-]]></Declaration>
+
+VAR PERSISTENT
+	elemCargado: BOOL;
+END_VAR]]></Declaration>
     <Implementation>
-      <ST><![CDATA[(*
-clumnas 1.6 - 1
-filas 0.5-2.1
-*)
+      <ST><![CDATA[
+CASE state OF
 
+    // 1. Esperando Start
+    1: 
+        IF GVLvar.botonStart THEN
+            enclaveStart := TRUE;
+            GVLvar.cinta := TRUE;
+            distBaldas();
+            iniPosOcupEst();
+            GVLvar.setPointZ := 0.3;
+            state := 2;  // pasar al siguiente estado
+        END_IF
 
-IF GVLvar.botonStart THEN
-	enclaveStart := TRUE;
-	GVLvar.cinta := TRUE;
-	distBaldas();
-END_IF
+    // 2. Espera caja en la entrada
+    2:
+        IF GVLvar.sensorEntradaGrua THEN
+            GVLvar.cinta := FALSE;
+            GVLvar.moveForksRight := TRUE;
+            state := 3;
+        END_IF
 
+    // 3. Horquilla desplegando
+    3:
+        IF GVLvar.forkRightLimit THEN
+            GVLvar.moveForksRight := FALSE;
+            elemCargado := TRUE;
+            state := 4;
+        END_IF
 
-IF enclaveStart THEN
-	
-	//si hay una caja en la enrada apr almacenar se prepara la grua
-	IF GVLvar.sensorEntradaGrua THEN
-		GVLvar.cinta := FALSE;
-		posicionEst := posicionEstanteria();
-		GVLvar.setPointX := posicionEst[1];
-		GVLvar.setPointZ := posicionEst[2];
-		//flanco de bajada en la senal de movimiento
-		// xq si no se para automaticamente la grua al apsar al else
-	ELSE
-		GVLvar.setPointX := 0.0;
-		GVLvar.setPointZ := 0.0;
-	END_IF
-	
-	
-END_IF
+    // 4. Calcular posición libre y mover X/Z
+    4:
+        IF elemCargado THEN
+            posicionEst := posicionEstanteria();
+            GVLvar.setPointX := posicionEst[1];   // columna (X)
+            GVLvar.setPointZ := posicionEst[2];   // fila (Z)
+            elemCargado := FALSE;
+            descargandoElem := TRUE;
+            state := 5;
+        END_IF
 
+    // 5. Esperar llegar a destino
+    5:
+		 IF GVLvar.movingX = posicionEst[1] THEN
+			 movingX := TRUE;
+		END_IF
+		IF GVLvar.movingZ = posicionEst[2] THEN
+			movingZ := TRUE;
+		END_IF
+		
+        IF movingZ AND movingX AND descargandoElem THEN
+            GVLvar.moveForksLeft := TRUE;
+            descargandoElem := FALSE;
+            state := 6;
+        END_IF
 
+    // 6. Horquilla descargando
+    6:
+        IF GVLvar.forkLeftLimit THEN
+            GVLvar.moveForksLeft := FALSE;
+            elemDescargado := TRUE;
+            state := 7;
+        END_IF
+
+    // 7. Volver a origen
+    7:
+        IF elemDescargado AND GVLvar.forkMiddleLimit THEN
+            GVLvar.setPointX := 0.0;
+            GVLvar.setPointZ := 0.3;
+            elemDescargado := FALSE;
+			GVLvar.cinta := TRUE;
+            state := 2;
+        END_IF
+
+//    // 8. Reanudar cinta y volver a esperar
+//    8:
+//        IF (GVLvar.movingX = 0.0) AND (GVLvar.movingZ = 0.3) THEN
+//            GVLvar.cinta := TRUE;
+//            state := 2;   // vuelve a esperar siguiente caja
+//        END_IF
+
+    // Estado por defecto (seguridad)
+    ELSE
+        state := 1;
+
+END_CASE
 ]]></ST>
     </Implementation>
     <LineIds Name="MAIN">
-      <LineId Id="35" Count="0" />
-      <LineId Id="40" Count="0" />
-      <LineId Id="39" Count="0" />
-      <LineId Id="38" Count="0" />
-      <LineId Id="36" Count="1" />
-      <LineId Id="2" Count="0" />
-      <LineId Id="6" Count="0" />
-      <LineId Id="41" Count="0" />
-      <LineId Id="89" Count="0" />
-      <LineId Id="7" Count="0" />
-      <LineId Id="57" Count="1" />
-      <LineId Id="9" Count="0" />
-      <LineId Id="18" Count="1" />
-      <LineId Id="14" Count="0" />
-      <LineId Id="43" Count="0" />
-      <LineId Id="27" Count="0" />
-      <LineId Id="45" Count="1" />
-      <LineId Id="91" Count="1" />
-      <LineId Id="47" Count="2" />
-      <LineId Id="17" Count="0" />
-      <LineId Id="20" Count="1" />
-      <LineId Id="15" Count="0" />
-      <LineId Id="10" Count="1" />
+      <LineId Id="208" Count="42" />
+      <LineId Id="291" Count="2" />
+      <LineId Id="289" Count="0" />
+      <LineId Id="294" Count="1" />
+      <LineId Id="290" Count="0" />
+      <LineId Id="251" Count="19" />
+      <LineId Id="288" Count="0" />
+      <LineId Id="271" Count="14" />
       <LineId Id="8" Count="0" />
     </LineIds>
   </POU>

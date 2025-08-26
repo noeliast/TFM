@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <POU Name="inicializarPosOcupEstanteria" Id="{b4946830-5ebd-495b-81cc-70df109f41ee}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK inicializarPosOcupEstanteria
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	i: INT;
+	fila: INT;
+	col: INT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Se inicializan las posicones del amlmcen a false
+// por defecto se empieza con el almacen vacio
+FOR fila := 1 TO 6 DO
+    FOR col := 1 TO 3 DO
+        // la primera posicion libre 
+		 GVLvar.baldasOcupadas[fila,col] := FALSE;
+    END_FOR
+END_FOR]]></ST>
+    </Implementation>
+    <LineIds Name="inicializarPosOcupEstanteria">
+      <LineId Id="26" Count="1" />
+      <LineId Id="15" Count="2" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
