@@ -1,0 +1,103 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <GVL Name="GVLvars" Id="{1e953f17-ba58-4dad-a187-58ea37758695}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	// Cuadro
+	{attribute 'OPC.UA.DA' := '1'}
+	botonStart : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	botonStop : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	luzVerde : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	luzRoja : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	luzAmarilla : BOOL;
+	
+	
+	// Sensores 
+	{attribute 'OPC.UA.DA' := '1'}
+	sDifusoCintaMaterial : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	sEntradaPaletizadorMaterial : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	sEntradaMesaRotation : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	sSalidaMesaRotacion : BOOL;
+
+	// Cintas
+	{attribute 'OPC.UA.DA' := '1'}
+	cintaEntradaMaterial : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	cintaInclinadaMaterial : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	cintaEntradaPalets : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	cintaSalida : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	 
+	
+	// Mesa Giratoria (Monoestable)
+	// Output
+	{attribute 'OPC.UA.DA' := '1'}
+	turnMesaGiratoria : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	load : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	unload : BOOL;
+	// Input
+	{attribute 'OPC.UA.DA' := '1'}
+	frontLimit : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	backLimit : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	minuminRotation : BOOL; // rotation limit 0
+	{attribute 'OPC.UA.DA' := '1'}
+	maximunRotation : BOOL; // rotation limit 90
+	
+	// Paletizador Salidas
+	{attribute 'OPC.UA.DA' := '1'}
+	pusher : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	turnFlipper : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	moveClamper : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	beltPositive : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	beltNegative : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	chainPositive : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	chainNegative : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	OpenPlate : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	elevatorUp : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	elevatorDown : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	elevatorToLimit : BOOL;
+	
+	
+	// Paletizador Entradas
+	{attribute 'OPC.UA.DA' := '1'}
+	clamped : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	plateLimit : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	pusherLimit : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	elevatorMoving : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	elevatorBackLimit : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	elevatorFrontLimit : BOOL;
+	
+	
+	
+
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

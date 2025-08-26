@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <POU Name="MAIN" Id="{801920e0-6ca6-4611-bcca-80d44a3fd171}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	enclaveStart: BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*
+	1 - Boton de start (enclave + cintas emisoras + turn de paletizador)
+	
+	2 - Boton de stop
+	
+	3 - Palets
+		- detectar palet en mesa de rotacion
+		- girar mesa de rotacion (con flanco de bajada de sensor de entrada)
+		- arrancar mesa de rotacion y cinta de salida
+		- retornar mesa a posicion inicial (flanco sensor salida)
+		- colocar palet en base del paletizador
+	
+	4 - Objeto a paletizar
+		- arrancar cinta inclinada con flanco de sensor 
+		- activar pusher con 2 objetos (contador por sensor)
+		- cuando se hizo push 2 veces (4 objetos sobre plato) -> elevar paletizaodr
+		- paletizaodr elevado -> abrir plato con objetos
+		- bajar palet cargado 
+		- cerrar plato
+		- activar cinta para sacar palet cargado de la estacion
+
+*)
+
+IF GVLvars.botonStart THEN
+	enclaveStart := TRUE;
+END_IF
+
+IF NOT GVLvars.botonStop THEN
+	enclaveStart := FALSE;
+END_IF
+
+
+
+
+
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN">
+      <LineId Id="2" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="14" Count="5" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="24" Count="1" />
+      <LineId Id="28" Count="3" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="6" Count="0" />
+      <LineId Id="33" Count="1" />
+      <LineId Id="41" Count="1" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="47" Count="1" />
+      <LineId Id="35" Count="5" />
+      <LineId Id="32" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
