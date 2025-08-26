@@ -3,31 +3,45 @@
   <GVL Name="GVL_Inputs" Id="{2126263c-2017-4a03-b1c0-1bc542fea6bc}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 VAR_GLOBAL
-	 // Entradas
-	 {attribute 'OPC.UA.DA' := '1'}
-    // Entradas
-	 {attribute 'OPC.UA.DA' := '1'}
-     Start_Button         : BOOL;       // Botón de arranque
-	 {attribute 'OPC.UA.DA' := '1'}   
-	 Sensor_Tanque_Salida : BOOL;       // Sensor fotoeléctrico justo antes del tanque
-	 {attribute 'OPC.UA.DA' := '1'}    
+	
+	// Cuadro
+	{attribute 'OPC.UA.DA' := '1'}
+	Start_Button : BOOL;  // Boton de arranque
+	{attribute 'OPC.UA.DA' := '1'}
+	StopButton : BOOL; // Boton de paro
+	{attribute 'OPC.UA.DA' := '1'}
+	luzVerde : BOOL; // luz verde stack
+	{attribute 'OPC.UA.DA' := '1'}
+	luzAmarilla : BOOL; // luz amarilla stack
+	{attribute 'OPC.UA.DA' := '1'}
+ 	luzRoja : BOOL; // luz roja stack
+	{attribute 'OPC.UA.DA' := '1'}
+	luzBotonStop : BOOL; // luz del boton de stop 
+	
+	
+	
+	// Sensores
+	{attribute 'OPC.UA.DA' := '1'}   
+	Sensor_Tanque_Salida : BOOL;       // Sensor fotoeléctrico justo antes del tanque
+	{attribute 'OPC.UA.DA' := '1'}    
 	Sensor_Barril_Listo  : BOOL;       // Sensor que detecta barril en posición
-	 {attribute 'OPC.UA.DA' := '1'}    
-	Level_Meter          : REAL;       // Nivel del tanque (0-10 V)
-		 {attribute 'OPC.UA.DA' := '1'}
-		// Salidas (valores analógicos de válvulas)
-	 {attribute 'OPC.UA.DA' := '1'}    
+	//	 {attribute 'OPC.UA.DA' := '1'}    
+	//	Level_Meter          : REAL;       // Nivel del tanque (0-10 V)
+	{attribute 'OPC.UA.DA' := '1'}
+	// Valvulas tanque
+	{attribute 'OPC.UA.DA' := '1'}    
 	Fill_Valve           : BOOL;       // Válvula de llenado (0–10 V)
-	 {attribute 'OPC.UA.DA' := '1'}    
+	{attribute 'OPC.UA.DA' := '1'}    
 	Discharge_Valve      : BOOL;       // Válvula de salida (0–10 V)
 	
-		// Salidas digitales para cintas
-	 {attribute 'OPC.UA.DA' := '1'}    
+	// Cintas
+	{attribute 'OPC.UA.DA' := '1'}    
 	Cinta_Entrada        : BOOL;
-	 {attribute 'OPC.UA.DA' := '1'}    
+	{attribute 'OPC.UA.DA' := '1'}    
 	Cinta_Tanque         : BOOL;
-	 {attribute 'OPC.UA.DA' := '1'}    
+	{attribute 'OPC.UA.DA' := '1'}    
 	Cinta_Salida         : BOOL;
+	
 
 END_VAR]]></Declaration>
   </GVL>

@@ -15,7 +15,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{D7A7F4C7-12B8-47C0-8DEC-77E7A99E475C}" Name="pruebaTanque" PrjFilePath="pruebaTanque\pruebaTanque.plcproj" TmcFilePath="pruebaTanque\pruebaTanque.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" CopyTmcToTarget="true" CopyTpyToTarget="false" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="pruebaTanque\pruebaTanque.tmc" TmcHash="{E9A9D44C-C4D6-4C0A-D80D-C293314A4594}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="pruebaTanque\pruebaTanque.tmc" TmcHash="{7039B9AD-9976-820D-FAE1-8CA14842D26B}">
 					<Name>pruebaTanque Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Contexts>

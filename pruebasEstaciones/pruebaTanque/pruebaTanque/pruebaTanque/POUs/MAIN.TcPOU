@@ -4,27 +4,34 @@
     <Declaration><![CDATA[PROGRAM MAIN
 VAR  
 	Sensor_Anterior : BOOL := FALSE;
-Flanco_Subida : BOOL := FALSE;
-Estado: INT := 0; // 0: Espera | 1: Descargando | 2: Post-descarga
-    
-   
-    // Variables internas
-    Sistema_Activo : BOOL;
-
-    Timer_Stop           : TON;
-    Esperando_Timer      : BOOL := FALSE;
-
-    Nivel_Bajo           : BOOL;
-    Nivel_Alto           : BOOL;
-    Nivel_OK             : BOOL;
+	Flanco_Subida : BOOL := FALSE;
+	Estado: INT := 0; // 0: Espera | 1: Descargando | 2: Post-descarga
+	
+	
+	// Variables internas
+	Sistema_Activo : BOOL;
+	
+	Timer_Stop           : TON;
+	Esperando_Timer      : BOOL := FALSE;
+	
+	Nivel_Bajo           : BOOL;
+	Nivel_Alto           : BOOL;
+	Nivel_OK             : BOOL;
 	// Temporizador para la descarga
-    Timer_Descarga       : TON;
-    Descargando          : BOOL := FALSE;
+	Timer_Descarga       : TON;
+	Descargando          : BOOL := FALSE;
 	Timer_Llenado: TON;
 	InicioLLenado: BOOL := TRUE;
 	VienesDeDescarga: BOOL;
 	primeraVez: BOOL;
 	numDescargas: INT;
+	luzVerde: BOOL;
+	luzAmarilla: BOOL;
+	luzRoja: BOOL;
+	tiempoLLenado: TIME;
+	tiempoTranscurrrido: TIME;
+	parado: BOOL; // variable que india que la secucnia paso por el etado de parado (se pulso stop)
+	tiempoRestante: DINT;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -32,17 +39,51 @@ END_VAR
 IF GVL_Inputs.Start_Button THEN
     Sistema_Activo := TRUE;
 	primeraVez := TRUE;
+	luzVerde := TRUE;
+	luzAmarilla := FALSE;
+	luzRoja := FALSE;
+	parado := FALSE;
 END_IF
 
-// Control inicial llenado tanque
-Timer_Llenado(IN := InicioLLenado, PT := T#35S);
-IF NOT Timer_Llenado.Q and InicioLLenado THEN
-    GVL_Inputs.Fill_Valve := TRUE;           // Abrir valvula llenado
-ELSE
-    GVL_Inputs.Fill_Valve := FALSE;          // Cerrar valvula llenado
-    // Solo dejar de iniciar llenado después de completar timer
-    InicioLLenado := FALSE;
+// Boton Stop -> se para 
+IF NOT GVL_Inputs.StopButton THEN
+	 Sistema_Activo := FALSE;
+	parado := TRUE;
+	luzVerde := FALSE;
+	luzAmarilla := TRUE;
+	luzRoja := FALSE;
+	tiempoTranscurrrido := Timer_Llenado.ET;
+	InicioLLenado := FALSE;
 END_IF
+ 
+// se pretende que el tanuqe este siempre ente un 20-80%
+// si el tanuqe esta vacio se necesitan  39s para el 80% 
+// si el tanque esta al 20% se necesitan 31s para el 80%
+// si el se paro en algun punto se calcula el tiempo rstante
+IF primeraVez THEN
+	tiempoLLenado := T#39S;
+//ELSIF parado THEN
+//	tiempoRestante := TIME_TO_DINT(tiempoLLenado) - TIME_TO_DINT(tiempoTranscurrrido);
+//	tiempoLLenado := DINT_TO_TIME(tiempoRestante);
+ELSE 
+	tiempoLLenado := T#31S;
+END_IF
+
+IF Sistema_Activo THEN
+	// Control inicial llenado tanque
+	Timer_Llenado(IN := InicioLLenado, PT := tiempoLLenado);
+	IF NOT Timer_Llenado.Q AND InicioLLenado THEN
+		GVL_Inputs.Fill_Valve := TRUE;           // Abrir valvula llenado
+	ELSE
+		GVL_Inputs.Fill_Valve := FALSE;          // Cerrar valvula llenado
+		// Solo dejar de iniciar llenado después de completar timer
+		InicioLLenado := FALSE;
+	END_IF
+END_IF
+
+
+
+
 // FLANCO DE BAJADA del sensor antes del tanque
 //Sensor_FlancoBajada := Sensor_Anterior AND NOT GVL_Inputs.Sensor_Tanque_Salida;
 //Sensor_Anterior := GVL_Inputs.Sensor_Tanque_Salida;
@@ -68,7 +109,9 @@ IF Sistema_Activo  AND InicioLLenado=FALSE THEN
 		GVL_Inputs.Cinta_Salida  := TRUE;
 		primeraVez := FALSE;
 	END_IF
-	Flanco_Subida := (NOT Sensor_Anterior) AND GVL_Inputs.Sensor_Tanque_Salida;
+
+
+Flanco_Subida := (NOT Sensor_Anterior) AND GVL_Inputs.Sensor_Tanque_Salida;
 Sensor_Anterior := GVL_Inputs.Sensor_Tanque_Salida;
 
 
@@ -106,7 +149,7 @@ Sensor_Anterior := GVL_Inputs.Sensor_Tanque_Salida;
 
         // Estado 2: Post-descarga - reactivar cintas
         2:
-			IF numDescargas < 15 THEN
+			IF numDescargas < 16 THEN
 				GVL_Inputs.Discharge_Valve := FALSE;
 				GVL_Inputs.Cinta_Entrada := TRUE;
 				GVL_Inputs.Cinta_Tanque  := TRUE;
@@ -182,10 +225,53 @@ ELSE
     Timer_Descarga(IN := FALSE);
     Descargando := FALSE;
 END_IF
+
+
+
+// ------------------------- Actualizar salidas -------------------------
+
+GVL_Inputs.luzAmarilla := luzAmarilla;
+GVL_Inputs.luzRoja := luzRoja;
+GVL_Inputs.luzVerde := luzVerde;
+
+
+
 ]]></ST>
     </Implementation>
     <LineIds Name="MAIN">
-      <LineId Id="1314" Count="41" />
+      <LineId Id="1314" Count="3" />
+      <LineId Id="1542" Count="1" />
+      <LineId Id="1545" Count="0" />
+      <LineId Id="1591" Count="0" />
+      <LineId Id="1318" Count="0" />
+      <LineId Id="1562" Count="0" />
+      <LineId Id="1538" Count="0" />
+      <LineId Id="1537" Count="0" />
+      <LineId Id="1539" Count="0" />
+      <LineId Id="1541" Count="0" />
+      <LineId Id="1549" Count="1" />
+      <LineId Id="1548" Count="0" />
+      <LineId Id="1587" Count="1" />
+      <LineId Id="1540" Count="0" />
+      <LineId Id="1563" Count="1" />
+      <LineId Id="1569" Count="1" />
+      <LineId Id="1597" Count="0" />
+      <LineId Id="1565" Count="0" />
+      <LineId Id="1567" Count="0" />
+      <LineId Id="1571" Count="0" />
+      <LineId Id="1594" Count="1" />
+      <LineId Id="1593" Count="0" />
+      <LineId Id="1573" Count="0" />
+      <LineId Id="1568" Count="0" />
+      <LineId Id="1566" Count="0" />
+      <LineId Id="1319" Count="0" />
+      <LineId Id="1576" Count="7" />
+      <LineId Id="1574" Count="1" />
+      <LineId Id="1585" Count="1" />
+      <LineId Id="1584" Count="0" />
+      <LineId Id="1328" Count="25" />
+      <LineId Id="1510" Count="1" />
+      <LineId Id="1508" Count="1" />
       <LineId Id="1413" Count="22" />
       <LineId Id="1476" Count="1" />
       <LineId Id="1436" Count="4" />
@@ -206,6 +292,11 @@ END_IF
       <LineId Id="1451" Count="0" />
       <LineId Id="1412" Count="0" />
       <LineId Id="1356" Count="55" />
+      <LineId Id="1551" Count="3" />
+      <LineId Id="1559" Count="0" />
+      <LineId Id="1558" Count="0" />
+      <LineId Id="1560" Count="1" />
+      <LineId Id="1555" Count="2" />
       <LineId Id="104" Count="0" />
     </LineIds>
   </POU>
