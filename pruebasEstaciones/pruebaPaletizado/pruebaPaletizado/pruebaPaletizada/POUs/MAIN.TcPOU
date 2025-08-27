@@ -4,6 +4,60 @@
     <Declaration><![CDATA[PROGRAM MAIN
 VAR
 	enclaveStart: BOOL;
+	cintaEntradaMaterial: BOOL;
+	cintaInclinadaMaterial: BOOL;
+	cintaEntradaPalets: BOOL;
+	cintaSalida: BOOL;
+	turnPaletizador: BOOL;
+	luzVerde: BOOL;
+	luzAmarilla : bool;
+	luzRoja: BOOL;
+	turnMesaGiratoria: BOOL;
+	load: BOOL;
+	unload: BOOL;
+	pusher: BOOL;
+	turnFlipper: BOOL;
+	moveClamper: BOOL;
+	beltPositive: BOOL;
+	beltNegative: BOOL;
+	chainPositive: BOOL;
+	chainNegative: BOOL;
+	openPlate: BOOL;
+	elevatorUp: BOOL;
+	elevatorDown: BOOL;
+	elevatorToLimit: BOOL;
+	cintaPaletEntradaEstacion : BOOL;
+	contadorVector: INT;
+	MatrizElemLista: BOOL;
+	PaletListo: bool;
+	timerOpenPlate: TON;
+	paletizadoListo : bool;
+	girando: BOOL;
+	flancoEntradaPalets: F_TRIG;
+	flancoPusher : R_TRIG;
+	flancoPlato: R_TRIG;
+	flancoEntradaMaterial : F_TRIG;
+	contadorMatriz : int;
+	timerAbrirPusher: TOn;
+	startTimerPusher: BOOL;
+	esperaPusher: BOOL;
+	esperaPusher2: BOOL;
+	timerVector: ton;
+	startTimerVector: BOOL;
+	
+	recogerPusher: BOOL;
+	senalAnterior: INT;
+	senalActual: INT;
+	pusherLimitAnt: BOOL;
+	flancoPusherManual: BOOL;
+	clamp: BOOL;
+	flancoPlateManual: BOOL;
+	plateLimitAnt: BOOL;
+	bajandoPalet: BOOL;
+	flancoPostPaletizado: F_TRIG;
+	flancoMoving : F_TRIG;
+	flancoMoVING2 : f_trig;
+	paletArriba: BOOL;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -32,13 +86,176 @@ END_VAR
 
 IF GVLvars.botonStart THEN
 	enclaveStart := TRUE;
+	//Arrancar cintas emisoras
+	cintaEntradaMaterial := TRUE;
+	cintaInclinadaMaterial := TRUE;
+	cintaEntradaPalets := TRUE;
+	cintaSalida := TRUE;
+	turnPaletizador := TRUE;
+
 END_IF
 
 IF NOT GVLvars.botonStop THEN
 	enclaveStart := FALSE;
 END_IF
 
+IF enclaveStart THEN
+	
+	// Si se detecta objeto en la salida de la cinta se activa la inclinada
+//	IF  GVLvars.sDifusoCintaMaterial THEN
+//		 cintaInclinadaMaterial := TRUE;
+//	END_IF
 
+
+// --------------------------- Material. Parte Superior ---------------------------
+
+flancoEntradaMaterial(CLK:=GVLvars.sEntradaPaletizadorMaterial);
+	IF  flancoEntradaMaterial.Q THEN
+			beltPositive := TRUE;
+			contadorVector := contadorVector + 1;
+	END_IF
+
+	// Si se dispone de una columna (2 elementos) se empuja hacia el plato
+	IF contadorVector = 2 THEN
+		startTimerVector := TRUE;
+	END_IF
+	timerVector(IN := startTimerVector, PT:=T#2S);
+		
+	IF timerVector.Q THEN
+		esperaPusher := TRUE;
+		startTimerVector := FALSE;
+	END_IF
+	
+	flancoPusher(CLK:=GVLvars.pusherLimit);
+	
+	IF esperaPusher THEN
+		beltPositive := FALSE;
+		pusher := TRUE;
+		cintaEntradaMaterial := FALSE;
+		cintaInclinadaMaterial := FALSE;
+		
+		//Si el cilindro se extendio de todo (empujo completamente al plato)
+		IF flancoPusher.Q THEN
+			//startTimerVector:=FALSE;
+			pusher := FALSE;
+			clamp := TRUE;
+			//beltPositive := TRUE;
+			contadorVector := 0;
+			esperaPusher := FALSE;
+			MatrizElemLista := TRUE;
+		END_IF
+	END_IF
+	
+	
+	
+END_IF
+
+
+// --------------------------- Palets. Parte Inferior ---------------------------
+flancoEntradaPalets(CLK:=GVLvars.sEntradaMesaRotation);
+	IF GVLvars.backLimit  THEN
+		load := TRUE;
+		//turnMesaGiratoria := TRUE;
+	END_IF
+//	IF GVLvars.backLimit AND GVLvars.frontLimit THEN
+//		load := FA;
+		
+//	END_IF
+	
+	// Si llega a la parte frontal de la mesa y todavia no acabo de rotar se paara
+	IF GVLvars.frontLimit AND NOT GVLvars.maximunRotation THEN
+		load := FALSE;
+		turnMesaGiratoria := TRUE;
+	// Si esta en la parte frontal de la mesa y esta giro completamente
+	ELSIF GVLvars.frontLimit AND GVLvars.maximunRotation THEN
+		load := TRUE;
+		cintaPaletEntradaEstacion := TRUE;
+	// Si no hay nada en la parte frontal, mesa girada del todo y ya paso el palet
+	// se podrias comprobar solo con el sensor difuso
+	ELSIF NOT GVLvars.frontLimit AND GVLvars.maximunRotation AND GVLvars.sSalidaMesaRotacion THEN
+		turnMesaGiratoria := FALSE;
+		//ScintaPaletEntradaEstacion := TRUE;
+	END_IF
+
+	flancoEntradaPalets(CLK:=GVLvars.sEntradaPaletEnEstacion);
+	
+	 IF  flancoEntradaPalets.Q THEN 
+		 chainPositive := TRUE;
+	 END_IF
+	 
+	 IF GVLvars.elevatorFrontLimit THEN
+		 chainPositive := FALSE;
+		 elevatorToLimit := TRUE;
+		 elevatorUp := TRUE;
+		 PaletListo := TRUE;
+		 
+	 END_IF
+	 
+	 
+	 
+	 flancoPlato(CLK:=GVLvars.plateLimit);
+	 
+	// Si el palet esta listo y los elementos agrupados
+	IF MatrizElemLista AND PaletListo THEN
+		openPlate := TRUE; // Se abre al plato con los materiales
+		//timerOpenPlate(IN:=openPlate, PT:= T#2S); // se espera a que este completamente abierto
+		// si las compuertas del plato estan completamente abiertas
+		IF flancoPlato.Q THEN
+			elevatorToLimit := FALSE; // se desactiva la senal de subida del palet
+			elevatorUp := FALSE; 
+			elevatorDown := TRUE; //  se activa la senal de bajada
+			paletizadoListo := TRUE;
+			openPlate := FALSE;
+			cintaEntradaMaterial := TRUE;
+			cintaInclinadaMaterial := TRUE;
+		END_IF
+	END_IF
+	 
+	
+	// Si el palet esta cargado con los materiales se dirige hacia el remover
+	IF paletizadoListo THEN
+		chainPositive := TRUE;
+		cintaSalida := TRUE;
+		IF GVLvars.sPostPaletizado THEN
+			chainPositive := FALSE;	
+			paletizadoListo := FALSE;
+			paletListo := FALSE;
+		END_IF	
+	END_IF
+	
+// --------------------------- Actualizar salidas ---------------------------
+
+// Paletizador (salidas)
+// Cuadro (salidas)
+GVLvars.luzVerde := luzVerde;
+GVLvars.luzRoja := luzRoja;
+GVLvars.luzAmarilla := luzAmarilla;
+
+// Cintas (salidas)
+GVLvars.cintaEntradaMaterial := cintaEntradaMaterial;
+GVLvars.cintaInclinadaMaterial := cintaInclinadaMaterial;
+GVLvars.cintaEntradaPalets := cintaEntradaPalets;
+GVLvars.cintaSalida := cintaSalida;
+GVLvars.cintaPaletEntradaEstacion := cintaPaletEntradaEstacion;
+
+// Mesa Giratoria (salidas)
+GVLvars.turnMesaGiratoria := turnMesaGiratoria;
+GVLvars.load :=  load;
+GVLvars.unload := unload;
+
+
+// Paletizador (salidas)
+GVLvars.pusher := pusher;
+GVLvars.turnFlipper := turnFlipper;
+GVLvars.moveClamper := moveClamper;
+GVLvars.beltPositive := beltPositive;
+GVLvars.beltNegative := beltNegative;
+GVLvars.chainPositive := chainPositive;
+GVLvars.chainNegative := chainNegative;
+GVLvars.OpenPlate := openPlate;
+GVLvars.elevatorUp := elevatorUp;
+GVLvars.elevatorDown := elevatorDown;
+GVLvars.elevatorToLimit := elevatorToLimit;
 
 
 
@@ -46,25 +263,9 @@ END_IF
 ]]></ST>
     </Implementation>
     <LineIds Name="MAIN">
-      <LineId Id="2" Count="0" />
-      <LineId Id="7" Count="0" />
-      <LineId Id="12" Count="0" />
-      <LineId Id="21" Count="0" />
-      <LineId Id="13" Count="0" />
-      <LineId Id="22" Count="0" />
-      <LineId Id="14" Count="5" />
-      <LineId Id="23" Count="0" />
-      <LineId Id="20" Count="0" />
-      <LineId Id="24" Count="1" />
-      <LineId Id="28" Count="3" />
-      <LineId Id="11" Count="0" />
-      <LineId Id="6" Count="0" />
-      <LineId Id="33" Count="1" />
-      <LineId Id="41" Count="1" />
-      <LineId Id="46" Count="0" />
-      <LineId Id="45" Count="0" />
-      <LineId Id="47" Count="1" />
-      <LineId Id="35" Count="5" />
+      <LineId Id="2420" Count="47" />
+      <LineId Id="2645" Count="36" />
+      <LineId Id="2531" Count="113" />
       <LineId Id="32" Count="0" />
     </LineIds>
   </POU>

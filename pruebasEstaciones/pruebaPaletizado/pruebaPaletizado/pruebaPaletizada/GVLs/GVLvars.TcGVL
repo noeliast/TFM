@@ -25,6 +25,10 @@ VAR_GLOBAL
 	sEntradaMesaRotation : BOOL;
 	{attribute 'OPC.UA.DA' := '1'}
 	sSalidaMesaRotacion : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	sPostPaletizado : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	sEntradaPaletEnEstacion : bool;
 
 	// Cintas
 	{attribute 'OPC.UA.DA' := '1'}
@@ -36,7 +40,7 @@ VAR_GLOBAL
 	{attribute 'OPC.UA.DA' := '1'}
 	cintaSalida : BOOL;
 	{attribute 'OPC.UA.DA' := '1'}
-	 
+	cintaPaletEntradaEstacion : BOOL;
 	
 	// Mesa Giratoria (Monoestable)
 	// Output
