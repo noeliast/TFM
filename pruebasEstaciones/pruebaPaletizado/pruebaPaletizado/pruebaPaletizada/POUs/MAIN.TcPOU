@@ -12,6 +12,7 @@ VAR
 	luzVerde: BOOL;
 	luzAmarilla : bool;
 	luzRoja: BOOL;
+	emergencia : bool;
 	turnMesaGiratoria: BOOL;
 	load: BOOL;
 	unload: BOOL;
@@ -58,6 +59,11 @@ VAR
 	flancoMoving : F_TRIG;
 	flancoMoVING2 : f_trig;
 	paletArriba: BOOL;
+	luzStart: BOOL;
+	luzStop: BOOL;
+	luzReset: BOOL;
+	mesaCargada: BOOL;
+	girandoMesa: BOOL;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -83,8 +89,11 @@ END_VAR
 		- activar cinta para sacar palet cargado de la estacion
 
 *)
+luzStart := FALSE;
+luzStop := FALSE;
+luzReset := FALSE;
 
-IF GVLvars.botonStart THEN
+IF GVLvars.botonStart AND NOT emergencia THEN
 	enclaveStart := TRUE;
 	//Arrancar cintas emisoras
 	cintaEntradaMaterial := TRUE;
@@ -92,15 +101,65 @@ IF GVLvars.botonStart THEN
 	cintaEntradaPalets := TRUE;
 	cintaSalida := TRUE;
 	turnPaletizador := TRUE;
-
+	luzStart := TRUE;
+	luzVerde := TRUE;
+	luzAmarilla := FALSE;
+	luzRoja := FALSE;
 END_IF
 
-IF NOT GVLvars.botonStop THEN
+IF NOT GVLvars.botonStop AND NOT emergencia THEN
 	enclaveStart := FALSE;
+	luzStop := TRUE;
+	luzVerde := FALSE;
+	luzAmarilla := TRUE;
+	luzRoja := FALSE;
+	cintaEntradaMaterial := FALSE;
+	cintaInclinadaMaterial := FALSE;
+	cintaEntradaPalets := FALSE;
+	cintaPaletEntradaEstacion := FALSE;
+	cintaSalida := FALSE;
+	turnPaletizador := FALSE;
+	turnMesaGiratoria := FALSE ;
+	load := FALSE ;
+	unload := FALSE;
 END_IF
 
-IF enclaveStart THEN
-	
+IF NOT GVLvars.seta THEN
+	enclaveStart := FALSE;
+	luzVerde := FALSE;
+	luzAmarilla := FALSE;
+	luzRoja := TRUE;
+	emergencia := TRUE; 
+	cintaEntradaMaterial := FALSE;
+	cintaInclinadaMaterial := FALSE;
+	cintaEntradaPalets := FALSE;
+	cintaPaletEntradaEstacion := FALSE;
+	cintaSalida := FALSE;
+	turnPaletizador := FALSE;
+	//turnMesaGiratoria := FALSE ;
+	load := FALSE ;
+	unload := FALSE;
+END_IF
+
+IF GVLvars.seta AND emergencia THEN
+	IF GVLvars.botonReset THEN
+		enclaveStart := TRUE;
+		luzVerde := TRUE;
+		luzAmarilla := FALSE;
+		luzRoja := FALSE;
+		emergencia := FALSE;
+		cintaEntradaMaterial := TRUE;
+		cintaInclinadaMaterial := TRUE;
+		cintaEntradaPalets := TRUE;
+		cintaPaletEntradaEstacion := TRUE;
+		cintaSalida := TRUE;
+		turnPaletizador := TRUE;
+//		turnMesaGiratoria := TRUE ;
+//		load := TRUE ;
+//		unload := TRUE;
+	END_IF
+END_IF
+
 	// Si se detecta objeto en la salida de la cinta se activa la inclinada
 //	IF  GVLvars.sDifusoCintaMaterial THEN
 //		 cintaInclinadaMaterial := TRUE;
@@ -108,8 +167,10 @@ IF enclaveStart THEN
 
 
 // --------------------------- Material. Parte Superior ---------------------------
-
-flancoEntradaMaterial(CLK:=GVLvars.sEntradaPaletizadorMaterial);
+IF enclaveStart AND NOT emergencia THEN
+	
+	flancoEntradaMaterial(CLK:=GVLvars.sEntradaPaletizadorMaterial);
+	
 	IF  flancoEntradaMaterial.Q THEN
 			beltPositive := TRUE;
 			contadorVector := contadorVector + 1;
@@ -148,14 +209,24 @@ flancoEntradaMaterial(CLK:=GVLvars.sEntradaPaletizadorMaterial);
 	
 	
 	
-END_IF
+
 
 
 // --------------------------- Palets. Parte Inferior ---------------------------
-flancoEntradaPalets(CLK:=GVLvars.sEntradaMesaRotation);
+	flancoEntradaPalets(CLK:=GVLvars.sEntradaMesaRotation);
 	IF GVLvars.backLimit  THEN
 		load := TRUE;
+		mesaCargada := TRUE;
+		
 		//turnMesaGiratoria := TRUE;
+	END_IF
+	
+	IF mesaCargada THEN
+		load:=TRUE;
+	END_IF
+	
+	IF girandoMesa THEN 
+		turnMesaGiratoria := TRUE;
 	END_IF
 //	IF GVLvars.backLimit AND GVLvars.frontLimit THEN
 //		load := FA;
@@ -166,6 +237,7 @@ flancoEntradaPalets(CLK:=GVLvars.sEntradaMesaRotation);
 	IF GVLvars.frontLimit AND NOT GVLvars.maximunRotation THEN
 		load := FALSE;
 		turnMesaGiratoria := TRUE;
+		girandoMesa := TRUE;
 	// Si esta en la parte frontal de la mesa y esta giro completamente
 	ELSIF GVLvars.frontLimit AND GVLvars.maximunRotation THEN
 		load := TRUE;
@@ -174,6 +246,8 @@ flancoEntradaPalets(CLK:=GVLvars.sEntradaMesaRotation);
 	// se podrias comprobar solo con el sensor difuso
 	ELSIF NOT GVLvars.frontLimit AND GVLvars.maximunRotation AND GVLvars.sSalidaMesaRotacion THEN
 		turnMesaGiratoria := FALSE;
+		mesaCargada := FALSE;
+		girandoMesa := FALSE;
 		//ScintaPaletEntradaEstacion := TRUE;
 	END_IF
 
@@ -222,7 +296,7 @@ flancoEntradaPalets(CLK:=GVLvars.sEntradaMesaRotation);
 			paletListo := FALSE;
 		END_IF	
 	END_IF
-	
+END_IF
 // --------------------------- Actualizar salidas ---------------------------
 
 // Paletizador (salidas)
@@ -263,9 +337,58 @@ GVLvars.elevatorToLimit := elevatorToLimit;
 ]]></ST>
     </Implementation>
     <LineIds Name="MAIN">
-      <LineId Id="2420" Count="47" />
-      <LineId Id="2645" Count="36" />
-      <LineId Id="2531" Count="113" />
+      <LineId Id="2420" Count="22" />
+      <LineId Id="2740" Count="0" />
+      <LineId Id="2742" Count="1" />
+      <LineId Id="2443" Count="8" />
+      <LineId Id="2752" Count="2" />
+      <LineId Id="2452" Count="3" />
+      <LineId Id="2751" Count="0" />
+      <LineId Id="2757" Count="1" />
+      <LineId Id="2755" Count="0" />
+      <LineId Id="2776" Count="2" />
+      <LineId Id="2780" Count="0" />
+      <LineId Id="2779" Count="0" />
+      <LineId Id="2775" Count="0" />
+      <LineId Id="2783" Count="0" />
+      <LineId Id="2785" Count="0" />
+      <LineId Id="2781" Count="0" />
+      <LineId Id="2456" Count="0" />
+      <LineId Id="2759" Count="0" />
+      <LineId Id="2749" Count="0" />
+      <LineId Id="2760" Count="0" />
+      <LineId Id="2763" Count="1" />
+      <LineId Id="2762" Count="0" />
+      <LineId Id="2765" Count="0" />
+      <LineId Id="2788" Count="7" />
+      <LineId Id="2787" Count="0" />
+      <LineId Id="2761" Count="0" />
+      <LineId Id="2750" Count="0" />
+      <LineId Id="2457" Count="0" />
+      <LineId Id="2767" Count="0" />
+      <LineId Id="2769" Count="0" />
+      <LineId Id="2771" Count="3" />
+      <LineId Id="2797" Count="7" />
+      <LineId Id="2796" Count="0" />
+      <LineId Id="2770" Count="0" />
+      <LineId Id="2768" Count="0" />
+      <LineId Id="2459" Count="7" />
+      <LineId Id="2747" Count="0" />
+      <LineId Id="2467" Count="0" />
+      <LineId Id="2645" Count="0" />
+      <LineId Id="2748" Count="0" />
+      <LineId Id="2646" Count="35" />
+      <LineId Id="2531" Count="8" />
+      <LineId Id="2805" Count="1" />
+      <LineId Id="2540" Count="1" />
+      <LineId Id="2808" Count="3" />
+      <LineId Id="2816" Count="3" />
+      <LineId Id="2542" Count="8" />
+      <LineId Id="2813" Count="0" />
+      <LineId Id="2551" Count="7" />
+      <LineId Id="2812" Count="0" />
+      <LineId Id="2820" Count="0" />
+      <LineId Id="2559" Count="85" />
       <LineId Id="32" Count="0" />
     </LineIds>
   </POU>

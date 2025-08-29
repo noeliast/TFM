@@ -9,6 +9,16 @@ VAR_GLOBAL
 	{attribute 'OPC.UA.DA' := '1'}
 	botonStop : BOOL;
 	{attribute 'OPC.UA.DA' := '1'}
+	seta : BOOL; 
+	{attribute 'OPC.UA.DA' := '1'}
+	botonReset : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	luzStart : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	luzStop : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	luzReset : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
 	luzVerde : BOOL;
 	{attribute 'OPC.UA.DA' := '1'}
 	luzRoja : BOOL;
