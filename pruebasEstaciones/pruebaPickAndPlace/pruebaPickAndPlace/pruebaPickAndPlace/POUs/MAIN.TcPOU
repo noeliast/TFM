@@ -3,7 +3,7 @@
   <POU Name="MAIN" Id="{d409ff99-3b5d-4bd9-9b04-f975b0e40891}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM MAIN
 VAR
-	enclaveStart : BOOL;
+	sistemaActivo : BOOL;
 	
 	cintaBase : BOOL;
 	cintaTapa : BOOL;
@@ -25,47 +25,82 @@ VAR
 	luzNaranja: BOOL;
 	luzRojo: BOOL;
 	luzStop: BOOL;
+	luzStart: BOOL;
+	luzReset: BOOL;
+	emergencia: BOOL;
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[//Si se pulsa el boton de start se arrancan als cintas
-IF GVL_Var.botonStart THEN
-	enclaveStart := TRUE;
+      <ST><![CDATA[luzStop := FALSE;
+luzStart := FALSE;
+luzReset := FALSE;
+
+//Si se pulsa el boton de start se arrancan als cintas
+IF GVLvars.botonStart AND NOT emergencia THEN
+	sistemaActivo := TRUE;
 	cintaBase := TRUE;
 	cintaTapa := TRUE;
 	luzVerde := TRUE;
 	luzNaranja := FALSE;
 	luzRojo := FALSE;
 	luzStop := FALSE;
+	luzStart := TRUE;
+	
 END_IF
 
-IF Not GVL_Var.botonStop THEN
-	luzStop := TRUE;
-	enclaveStart := FALSE;
+IF NOT GVLvars.botonStop AND NOT emergencia THEN
+	luzReset := TRUE;
+	sistemaActivo := FALSE;
 	cintaBase := FALSE;
 	cintaTapa := FALSE;
 	luzVerde := FALSE;
 	luzNaranja := TRUE;
 	luzRojo := FALSE;
+	
 END_IF
 
-IF enclaveStart THEN
-	flancoTapa(CLK:=GVL_Var.sensorFotoTapa);
-	flancoBase(CLK:= GVL_Var.sensorFotoBase);
+
+IF NOT GVLvars.seta THEN
+	sistemaActivo := FALSE;
+	cintaBase := FALSE;
+	cintaTapa := FALSE;
+	luzVerde := FALSE;
+	luzNaranja := FALSE;
+	luzRojo := TRUE;
+	emergencia := TRUE;
+END_IF
+
+
+IF  GVLvars.seta AND emergencia THEN
+	IF GVLvars.botonReset THEN
+		sistemaActivo := TRUE;
+		luzVerde := TRUE;
+		luzNaranja := FALSE;
+		luzRojo := FALSE;
+		luzStop := FALSE;
+		luzStart := FALSE;
+		luzReset := TRUE;
+		emergencia := FALSE;
+	END_IF
+END_IF
+
+IF sistemaActivo AND emergencia = FALSE THEN
+	flancoTapa(CLK:=GVLvars.sensorFotoTapa);
+	flancoBase(CLK:= GVLvars.sensorFotoBase);
 	
 	// Base en barrera posicionadora
 	IF  flancoBase.Q THEN
 		baseOK := TRUE;
 		cintaBase := FALSE;
 		
-		GVL_Var.cerrarAbrazaderaBase := TRUE;
+		GVLvars.cerrarAbrazaderaBase := TRUE;
 	END_IF
 	
 	// Tapa en barrera posiconadora
 	IF flancoTapa.Q THEN
 		tapaOK := TRUE;
 		cintaTapa := FALSE;
-		GVL_Var.cerrarAbrazaderaTapa := TRUE;
+		GVLvars.cerrarAbrazaderaTapa := TRUE;
 	END_IF
 	
 //	// --- Detección de flancos ---
@@ -79,19 +114,19 @@ IF enclaveStart THEN
 	CASE EstadoPickPlace OF
 	
 		0: // Inicio - piezas posicionadas y abrazaderas cerradas
-			IF baseOK AND tapaOK AND GVL_Var.limiteSujeccionBase AND GVL_Var.limiteSujeccionTapa THEN
+			IF baseOK AND tapaOK AND GVLvars.limiteSujeccionBase AND GVLvars.limiteSujeccionTapa THEN
 				EstadoPickPlace := 1;
 			END_IF
 	
 		1: // Desplagar horizontalmente
-			GVL_Var.PickPlace_MoverZ := FALSE; // vertical
-			GVL_Var.PickPlace_MoverX := TRUE; //  horizontal
-			GVL_Var.PickPlace_Agarrar := FALSE; // ventosa
+			GVLvars.PickPlace_MoverZ := FALSE; // vertical
+			GVLvars.PickPlace_MoverX := TRUE; //  horizontal
+			GVLvars.PickPlace_Agarrar := FALSE; // ventosa
 	
 
 			// EBERIA SER CON FLANCOS
 			// si esta comletamnte extentida horizontalmente -> siguiente estao
-			IF NOT GVL_Var.PickPlace_MovingXY THEN
+			IF NOT GVLvars.PickPlace_MovingXY THEN
 				timerMovimiento(IN:=TRUE, PT:=T#2S);
 				IF timerMovimiento.Q THEN
 //				GVL_Var.PickPlace_MoverZ := FALSE;
@@ -103,20 +138,20 @@ IF enclaveStart THEN
 			END_IF
 	
 		2: // Bajamos vertical
-			GVL_Var.PickPlace_MoverZ := TRUE; //desplargar vertical
-			GVL_Var.PickPlace_MoverX := TRUE; // esplagamos horizontal
-			GVL_Var.PickPlace_Agarrar := FALSE; // ventosa
+			GVLvars.PickPlace_MoverZ := TRUE; //desplargar vertical
+			GVLvars.PickPlace_MoverX := TRUE; // esplagamos horizontal
+			GVLvars.PickPlace_Agarrar := FALSE; // ventosa
 
 			// DEBERIA SER CON FLANCOS
 			// si esta comletamnte extentida horizontalmente -> siguiente estao
-			IF NOT GVL_Var.PickPlace_MovingZ THEN
+			IF NOT GVLvars.PickPlace_MovingZ THEN
 				EstadoPickPlace := 3;
 			END_IF
 	
 		3: // AGARRAR objeto
-			GVL_Var.PickPlace_MoverZ := TRUE;  
-			GVL_Var.PickPlace_MoverX := TRUE;
-			GVL_Var.PickPlace_Agarrar := TRUE;
+			GVLvars.PickPlace_MoverZ := TRUE;  
+			GVLvars.PickPlace_MoverX := TRUE;
+			GVLvars.PickPlace_Agarrar := TRUE;
 	
 			
 			timerMovimiento(IN:=TRUE, PT:=T#2S);
@@ -128,14 +163,14 @@ IF enclaveStart THEN
 			END_IF
 	
 		4: // recogemos verticalmente ocn objeto agarrado
-			GVL_Var.PickPlace_MoverZ := FALSE;  
-			GVL_Var.PickPlace_MoverX := TRUE;
-			GVL_Var.PickPlace_Agarrar := TRUE;
+			GVLvars.PickPlace_MoverZ := FALSE;  
+			GVLvars.PickPlace_MoverX := TRUE;
+			GVLvars.PickPlace_Agarrar := TRUE;
 	
 
 			// DEBERIA SER CON FLANCOS
 			// si esta comletamnte extentida horizontalmente -> siguiente estao
-			IF NOT GVL_Var.PickPlace_MovingZ THEN
+			IF NOT GVLvars.PickPlace_MovingZ THEN
 				
 			timerMovimiento(IN:=TRUE, PT:=T#2S);
 			IF timerMovimiento.Q THEN
@@ -148,14 +183,14 @@ IF enclaveStart THEN
 			END_IF
 	
 		5: // recogemos horizontal con pieza aujeta
-			GVL_Var.PickPlace_MoverZ := FALSE;  
-			GVL_Var.PickPlace_MoverX := FALSE;
-			GVL_Var.PickPlace_Agarrar := TRUE;
+			GVLvars.PickPlace_MoverZ := FALSE;  
+			GVLvars.PickPlace_MoverX := FALSE;
+			GVLvars.PickPlace_Agarrar := TRUE;
 			
 			//GVL_Var.cerrarAbrazaderaBase := FALSE;
 	
 
-			IF NOT GVL_Var.PickPlace_MovingXY THEN
+			IF NOT GVLvars.PickPlace_MovingXY THEN
 				
 			timerMovimiento(IN:=TRUE, PT:=T#2S);
 			IF timerMovimiento.Q THEN
@@ -168,12 +203,12 @@ IF enclaveStart THEN
 			END_IF
 	
 		6: //bajar verticalmente
-			GVL_Var.PickPlace_MoverZ := TRUE;  
-			GVL_Var.PickPlace_MoverX := FALSE;
-			GVL_Var.PickPlace_Agarrar := TRUE;
+			GVLvars.PickPlace_MoverZ := TRUE;  
+			GVLvars.PickPlace_MoverX := FALSE;
+			GVLvars.PickPlace_Agarrar := TRUE;
 	
 		
-			IF NOT GVL_Var.PickPlace_MovingZ THEN
+			IF NOT GVLvars.PickPlace_MovingZ THEN
 				
 			timerMovimiento(IN:=TRUE, PT:=T#2S);
 			IF timerMovimiento.Q THEN
@@ -188,37 +223,37 @@ IF enclaveStart THEN
 
 	
 		7: // soltar objeto
-			GVL_Var.PickPlace_MoverZ := TRUE;  
-			GVL_Var.PickPlace_MoverX := FALSE;
-			GVL_Var.PickPlace_Agarrar := FALSE;
+			GVLvars.PickPlace_MoverZ := TRUE;  
+			GVLvars.PickPlace_MoverX := FALSE;
+			GVLvars.PickPlace_Agarrar := FALSE;
 	
 			// Reiniciar variables y continuar producción
 			estadoPickPlace := 8;
 			
 			
 		8:
-			GVL_Var.PickPlace_MoverZ := FALSE;  
-			GVL_Var.PickPlace_MoverX := FALSE;
-			GVL_Var.PickPlace_Agarrar := FALSE;
+			GVLvars.PickPlace_MoverZ := FALSE;  
+			GVLvars.PickPlace_MoverX := FALSE;
+			GVLvars.PickPlace_Agarrar := FALSE;
 			
-			IF NOT GVL_Var.PickPlace_MovingZ THEN		
+			IF NOT GVLvars.PickPlace_MovingZ THEN		
 					EstadoPickPlace := 9;
 			END_IF
 			
 		//Estado para levantar a barreara de posicionameinto
 		// e arranque de cintas
 		9:
-			GVL_Var.levantarAbrazaderaTapa := TRUE;
+			GVLvars.levantarAbrazaderaTapa := TRUE;
 			cintaBase := TRUE;
 			cintaTapa := TRUE;
 			//Si lla paso la barrera posicionadora
-			IF GVL_Var.sensorPostSellado THEN
-				GVL_Var.levantarAbrazaderaTapa := FALSE;
+			IF GVLvars.sensorPostSellado THEN
+				GVLvars.levantarAbrazaderaTapa := FALSE;
 				baseOK := FALSE;
 				tapaOK := FALSE;
 	
-				GVL_Var.cerrarAbrazaderaBase := FALSE;
-				GVL_Var.cerrarAbrazaderaTapa := FALSE;
+				GVLvars.cerrarAbrazaderaBase := FALSE;
+				GVLvars.cerrarAbrazaderaTapa := FALSE;
 	
 				EstadoPickPlace := 0;
 			END_IF
@@ -229,12 +264,14 @@ IF enclaveStart THEN
 END_IF
 
 // Se actualizan las salias
-GVL_Var.cintaBases := cintaBase;
-GVL_Var.cintaTapas := cintaTapa;
-GVL_Var.luzVerticalNaranja := luzNaranja;
-GVL_Var.luzVerticalRoja := luzRojo;
-GVL_Var.luzVerticalVerde := luzVerde;
-GVL_Var.luzStop := luzStop;
+GVLvars.cintaBases := cintaBase;
+GVLvars.cintaTapas := cintaTapa;
+GVLvars.luzVerticalNaranja := luzNaranja;
+GVLvars.luzVerticalRoja := luzRojo;
+GVLvars.luzVerticalVerde := luzVerde;
+GVLvars.luzStop := luzStop;
+GVLvars.luzStart := luzStart;
+GVLvars.luzReset := luzReset;
 //GVL_Var.cerrarAbrazaderaBase :=
 //GVL_Var.cerrarAbrazaderaTapa
 //GVL_Var.levantarAbrazaderaBase
@@ -245,101 +282,18 @@ GVL_Var.luzStop := luzStop;
 ]]></ST>
     </Implementation>
     <LineIds Name="MAIN">
-      <LineId Id="48" Count="0" />
-      <LineId Id="7" Count="0" />
-      <LineId Id="10" Count="0" />
-      <LineId Id="16" Count="0" />
-      <LineId Id="21" Count="0" />
-      <LineId Id="603" Count="0" />
-      <LineId Id="610" Count="1" />
-      <LineId Id="617" Count="0" />
-      <LineId Id="11" Count="0" />
-      <LineId Id="572" Count="0" />
-      <LineId Id="574" Count="0" />
-      <LineId Id="612" Count="0" />
-      <LineId Id="599" Count="0" />
-      <LineId Id="601" Count="1" />
-      <LineId Id="605" Count="1" />
-      <LineId Id="608" Count="0" />
-      <LineId Id="600" Count="0" />
-      <LineId Id="275" Count="1" />
-      <LineId Id="575" Count="2" />
-      <LineId Id="279" Count="34" />
-      <LineId Id="418" Count="1" />
-      <LineId Id="423" Count="0" />
-      <LineId Id="420" Count="0" />
-      <LineId Id="545" Count="5" />
-      <LineId Id="544" Count="0" />
-      <LineId Id="421" Count="1" />
-      <LineId Id="325" Count="1" />
-      <LineId Id="424" Count="1" />
-      <LineId Id="327" Count="0" />
-      <LineId Id="427" Count="4" />
-      <LineId Id="426" Count="0" />
-      <LineId Id="333" Count="5" />
-      <LineId Id="454" Count="0" />
-      <LineId Id="339" Count="8" />
-      <LineId Id="432" Count="1" />
-      <LineId Id="348" Count="0" />
-      <LineId Id="350" Count="0" />
-      <LineId Id="439" Count="0" />
-      <LineId Id="435" Count="2" />
-      <LineId Id="477" Count="6" />
-      <LineId Id="476" Count="0" />
-      <LineId Id="438" Count="0" />
-      <LineId Id="434" Count="0" />
-      <LineId Id="359" Count="1" />
-      <LineId Id="440" Count="1" />
-      <LineId Id="361" Count="0" />
-      <LineId Id="543" Count="0" />
-      <LineId Id="542" Count="0" />
-      <LineId Id="363" Count="0" />
-      <LineId Id="370" Count="0" />
-      <LineId Id="456" Count="0" />
-      <LineId Id="485" Count="6" />
-      <LineId Id="484" Count="0" />
-      <LineId Id="457" Count="0" />
-      <LineId Id="455" Count="0" />
-      <LineId Id="371" Count="1" />
-      <LineId Id="444" Count="1" />
-      <LineId Id="373" Count="1" />
-      <LineId Id="378" Count="0" />
-      <LineId Id="461" Count="0" />
-      <LineId Id="494" Count="6" />
-      <LineId Id="492" Count="1" />
-      <LineId Id="462" Count="0" />
-      <LineId Id="460" Count="0" />
-      <LineId Id="458" Count="0" />
-      <LineId Id="379" Count="1" />
-      <LineId Id="447" Count="1" />
-      <LineId Id="446" Count="0" />
-      <LineId Id="386" Count="1" />
-      <LineId Id="397" Count="1" />
-      <LineId Id="449" Count="1" />
-      <LineId Id="452" Count="1" />
-      <LineId Id="451" Count="0" />
-      <LineId Id="463" Count="0" />
-      <LineId Id="465" Count="1" />
-      <LineId Id="464" Count="0" />
-      <LineId Id="501" Count="1" />
-      <LineId Id="504" Count="0" />
-      <LineId Id="506" Count="1" />
-      <LineId Id="512" Count="1" />
-      <LineId Id="511" Count="0" />
-      <LineId Id="508" Count="1" />
-      <LineId Id="515" Count="4" />
-      <LineId Id="523" Count="0" />
-      <LineId Id="514" Count="0" />
-      <LineId Id="510" Count="0" />
-      <LineId Id="399" Count="2" />
-      <LineId Id="277" Count="1" />
-      <LineId Id="411" Count="0" />
-      <LineId Id="154" Count="0" />
-      <LineId Id="34" Count="0" />
-      <LineId Id="402" Count="0" />
-      <LineId Id="613" Count="2" />
-      <LineId Id="618" Count="0" />
-      <LineId Id="403" Count="7" />
+      <LineId Id="962" Count="1" />
+      <LineId Id="960" Count="1" />
+      <LineId Id="715" Count="25" />
+      <LineId Id="966" Count="0" />
+      <LineId Id="743" Count="4" />
+      <LineId Id="964" Count="0" />
+      <LineId Id="748" Count="5" />
+      <LineId Id="756" Count="4" />
+      <LineId Id="959" Count="0" />
+      <LineId Id="965" Count="0" />
+      <LineId Id="761" Count="197" />
+      <LineId Id="410" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

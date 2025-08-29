@@ -18,7 +18,7 @@
     <LibraryReferences>{2c5b93f7-5e10-42ff-ac0f-7ce11aa0c752}</LibraryReferences>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="GVLs\GVL_Var.TcGVL">
+    <Compile Include="GVLs\GVLvars.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
