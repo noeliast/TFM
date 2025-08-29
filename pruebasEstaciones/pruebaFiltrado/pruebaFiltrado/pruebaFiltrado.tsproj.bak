@@ -4,8 +4,8 @@
 		<System>
 			<Licenses IgnoreProjectLicenses="true">
 				<Target>
-					<ManualSelect>{BDCC0070-42D5-49AE-ABF1-1D4434813D60}</ManualSelect>
 					<ManualSelect>{66689887-CCBD-452C-AC9A-039D997C6E66}</ManualSelect>
+					<ManualSelect>{BDCC0070-42D5-49AE-ABF1-1D4434813D60}</ManualSelect>
 				</Target>
 			</Licenses>
 			<Tasks>
@@ -16,7 +16,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{D9F86307-F940-46BC-8275-09308316297B}" Name="pruebaFiltrado" PrjFilePath="pruebaFiltrado\pruebaFiltrado.plcproj" TmcFilePath="pruebaFiltrado\pruebaFiltrado.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" CopyTmcToTarget="true" CopyTpyToTarget="false" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="pruebaFiltrado\pruebaFiltrado.tmc" TmcHash="{D417AD3B-C812-0B4A-CB40-09A3BEE3FBE5}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="pruebaFiltrado\pruebaFiltrado.tmc" TmcHash="{F5409C02-49D1-4009-F599-E0CED8971639}">
 					<Name>pruebaFiltrado Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Contexts>

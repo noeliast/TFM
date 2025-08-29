@@ -3,9 +3,30 @@
   <GVL Name="GVLvars" Id="{d6bfcba1-ae83-402d-aad6-49aebae6c93b}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 VAR_GLOBAL
+	
 	// Cuadro
 	{attribute 'OPC.UA.DA' := '1'}
-	botonStart : BOOL;
+	botonStart : BOOL; // boton de start
+	{attribute 'OPC.UA.DA' := '1'}
+	botonStop : BOOL; // boton de stop 
+	{attribute 'OPC.UA.DA' := '1'}
+	botonReset : BOOL; // boton de reset
+	{attribute 'OPC.UA.DA' := '1'}
+	setaEmergencia : BOOL; // seta de emergencia 
+	{attribute 'OPC.UA.DA' := '1'}
+	luzVerde : BOOL; // luz verde stack
+	{attribute 'OPC.UA.DA' := '1'}
+	luzAmarilla : BOOL; // luz amarilla stack
+	{attribute 'OPC.UA.DA' := '1'}
+	luzRoja : BOOL; // luz roja stack
+	{attribute 'OPC.UA.DA' := '1'}
+	luzBotonStop : BOOL; // luz integrada en boton de stop
+	{attribute 'OPC.UA.DA' := '1'}
+	luzBotonStart : BOOL; // luz integrada en boton de start
+	{attribute 'OPC.UA.DA' := '1'}
+	luzBotonReset : BOOL; // luz integrada en boton de reset
+	
+	
 	
 	// Cintas
 	{attribute 'OPC.UA.DA' := '1'}
@@ -23,6 +44,8 @@ VAR_GLOBAL
 	{attribute 'OPC.UA.DA' := '1'}
 	cintaBascula : bool;
 
+	
+	
 	// Sensores
 	{attribute 'OPC.UA.DA' := '1'}
 	pesoBascula : REAL;
@@ -42,6 +65,7 @@ VAR_GLOBAL
  	sCilindroBascula : BOOL;
 	{attribute 'OPC.UA.DA' := '1'}
 	sVision : DINT;
+	
 	
 	
 	// Cilindros

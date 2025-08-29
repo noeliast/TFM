@@ -24,18 +24,30 @@ VAR
 	difusoVisionAnt: bool;
 	descartando: BOOL;
 	flancAnteriorCilindroVision : F_TRIG;
-	flancoCintaDescarte : R_TRIG;
+	flancoCintaDescarte : F_TRIG;
 	descratandoXpeso: BOOL;
 	startTimerBascula: BOOL;
 	flancoCintaDescarteBascula: F_TRIG;
 	flancAnteriorCilindroBascula: F_TRIG;
+	luzStart: BOOL;
+	luzVerde: BOOL;
+	luzAmarilla: BOOL;
+	luzRoja: BOOL;
+	luzStop: BOOL;
+	luzReset: BOOL;
+	emergencia: BOOL;
+	objetoPosicionDescarteV: BOOL;
+	objetoPosicionDescarteP: BOOL;
+	peso: REAL;
+	sinComparar: BOOL := false;
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[(*
 
 1 - Si se pulsa strart -> enclave y arranque de cintas
-
+  -	** Si se pulsa stop -> parar toda la secuencia
+  
 2 - Si se detecta en el sensor fotoelectrico de vision
 	* Se para esa cinta 2 segundos
 	* Se cogen las caracteristicas del objeto
@@ -60,22 +72,81 @@ END_VAR
 
 *)
 
-// ------------------- PASO 1 -------------------
+// ------------------- PASO 1  Botones Cuadro -------------------
 
-IF GVLvars.botonStart THEN
+luzStart := FALSE;
+luzStop := FALSE;
+luzReset := FALSE; 
+
+IF GVLvars.botonStart AND NOT emergencia THEN
 	enclaveStart := TRUE;
 	cintaVision := TRUE;
-	cintaRemoveVision := TRUE;
+	//cintaRemoveVision := TRUE;
 	cintaBascula := TRUE;
 	cintaPostBascula := TRUE;
-	cintaRemoveBascula 	:= TRUE;
+	//cintaRemoveBascula 	:= TRUE;
+	luzStart := TRUE; 
+	luzVerde := TRUE;
+	luzAmarilla := FALSE;
+	luzRoja := FALSE;
+END_IF
+
+IF NOT GVLvars.botonStop AND NOT emergencia THEN
+	enclaveStart := FALSE;
+	cintaVision := FALSE;
+	cintaRemoveVision := FALSE;
+	cintaBascula := FALSE;
+	cintaPostBascula := FALSE;
+	cintaRemoveBascula 	:= FALSE;
+	cilindroVision := FALSE;
+	cilindroBascula := FALSE;
+	luzStop := TRUE; 
+	luzVerde := FALSE;
+	luzAmarilla := TRUE;
+	luzRoja := FALSE;
 END_IF
 
 
-IF enclaveStart THEN
-	
-// ------------------- PASO 2 - Filtro Vision -------------------
 
+IF NOT GVLvars.setaEmergencia THEN
+	enclaveStart := FALSE;
+	cintaVision := FALSE;
+	cintaRemoveVision := FALSE;
+	cintaBascula := FALSE;
+	cintaPostBascula := FALSE;
+	cintaRemoveBascula 	:= FALSE;
+	cilindroVision := FALSE;
+	cilindroBascula := FALSE;
+	luzStop := FALSE; 
+	luzVerde := FALSE;
+	luzAmarilla := FALSE;
+	luzRoja := TRUE;
+	emergencia := TRUE;
+	//luzReset := TRUE;
+END_IF
+
+
+IF GVLvars.setaEmergencia AND emergencia THEN
+	IF GVLvars.botonReset THEN
+		enclaveStart := TRUE;
+		luzStop := FALSE; 
+		luzVerde := TRUE;
+		luzAmarilla := FALSE;
+		luzRoja := FALSE;
+		emergencia := FALSE;
+		luzReset := TRUE;
+		cintaVision := TRUE;
+		cintaRemoveVision := TRUE;
+		cintaBascula := TRUE;
+		cintaPostBascula := TRUE;
+		cintaRemoveBascula 	:= TRUE;
+	END_IF
+END_IF
+
+
+// ------------------- PASO 2 - Filtro Vision -------------------
+IF enclaveStart AND NOT emergencia THEN
+	
 	// Detectar flanco ascendente solo una vez por detección
 	IF GVLvars.sDifusoVision AND NOT difusoVisionAnt THEN
 		startTimerVision := TRUE;  // Arranca el temporizador solo una vez por evento
@@ -110,17 +181,25 @@ IF enclaveStart THEN
 	flancoCintaDescarte(CLK := GVLvars.sDifusoRemoveVision);
 	
 	// Si tenemos que descartar y el objeto para el sensor (se situa el objeto en frente del cilindro)
-	IF descartando = TRUE  AND flancAnteriorCilindroVision.Q THEN
-		cintaVision := FALSE;
-		cilindroVision := TRUE;
-		cintaDescarteVision := TRUE;
+	IF descartando = TRUE  AND  flancAnteriorCilindroVision.Q  THEN
+		objetoPosicionDescarteV:=TRUE;
+		
 	END_IF
 	
+	
+	IF objetoPosicionDescarteV THEN	
+		cintaVision := FALSE;
+		cilindroVision := TRUE;
+		cintaRemoveVision := TRUE;	
+	END_IF
+
 	// si e objeto ya esta en la cinta de descarte se reanuda con la de vision
-	IF GVLvars.sCilindroVisionDelantero THEN
+	IF flancoCintaDescarte.Q  THEN 
 		cintaVision := TRUE;
 		cilindroVision := FALSE;	
 		descartando := FALSE;
+		cintaRemoveVision := FALSE;
+		objetoPosicionDescarteV := FALSE;
 		
 	END_IF
 
@@ -137,17 +216,20 @@ IF enclaveStart THEN
 	
 	timerBascula(IN:=startTimerBascula, PT:=T#2S);
 	
-	IF timerBascula.Q THEN
+	IF timerBascula.Q AND sinComparar = FALSE THEN
 		startTimerBascula := FALSE;
-	
+		peso := GVLvars.pesoBascula;
 		// Si el peso es mayor de un umbral se descarta
-		IF GVLvars.pesoBascula > 4 THEN
-			descarteXpeso := TRUE;
-		ELSE
-			descarteXpeso := FALSE;
-		END_IF
-	
 		cintaBascula := TRUE; // Reanuda la marcha
+		sinComparar := TRUE;
+	END_IF
+	
+	IF  peso > 4 THEN
+		descarteXpeso := TRUE;
+		sinComparar := FALSE;
+	ELSE
+		descarteXpeso := FALSE;
+		sinComparar := FALSE;
 	END_IF
 		
 	// Si hay que descartar y se detecta objeto delante del cilindro
@@ -155,22 +237,33 @@ IF enclaveStart THEN
 		descratandoXpeso := TRUE;
 	END_IF
 	
-	//flancAnteriorCilindroBascula(CLK := GVLvars.sCilindroBascula);
+	flancAnteriorCilindroBascula(CLK := GVLvars.sCilindroBascula);
 	flancoCintaDescarteBascula(CLK := GVLvars.sDifusoRemovePeso);
 	
 	// Si tenemos que descartar y el objeto para el sensor
-	IF descratandoXpeso = TRUE AND GVLvars.sCilindroBascula THEN
-		cintaBascula := FALSE;
+	IF descratandoXpeso = TRUE AND flancAnteriorCilindroBascula.Q THEN
+		objetoPosicionDescarteP:=TRUE;
+	END_IF
+
+	IF objetoPosicionDescarteP THEN
+		cintaPostBascula := FALSE;
 		cilindroBascula := TRUE;
-		cintaDescarteBascula := TRUE;
-	END_IF	
+		cintaRemoveBascula := TRUE;
+		
+	END_IF
+
+
+
 	
 	// si el objeto ya está en la cinta de descarte, se reanuda la cinta bascula
-	IF GVLvars.sCilindroBasculaDelantero THEN
-		cintaBascula := TRUE;
+	//IF GVLvars.sCilindroBasculaDelantero THEN
+	IF flancoCintaDescarteBascula.Q THEN
+		cintaPostBascula := TRUE;
 		cilindroBascula := FALSE;
 		descratandoXpeso := FALSE;
 		descarteXpeso := FALSE;
+		cintaRemoveBascula := FALSE;
+		objetoPosicionDescarteP := FALSE;
 	END_IF
 
 
@@ -190,28 +283,105 @@ GVLvars.cintaVision := cintaVision;
 // Cilindros
 GVLvars.cilindroBascula := cilindroBascula;
 GVLvars.cilindroVision := cilindroVision;
+
+// Cuadro
+GVLvars.luzAmarilla := luzAmarilla;
+GVLvars.luzRoja := luzRoja;
+GVLvars.luzVerde := luzVerde;
+GVLvars.luzBotonStop := luzStop;
+GVLvars.luzBotonStart := luzStart;
+
+
+
+
+
 ]]></ST>
     </Implementation>
     <LineIds Name="MAIN">
-      <LineId Id="335" Count="75" />
-      <LineId Id="472" Count="0" />
-      <LineId Id="411" Count="4" />
-      <LineId Id="570" Count="1" />
-      <LineId Id="416" Count="4" />
+      <LineId Id="335" Count="3" />
+      <LineId Id="603" Count="0" />
+      <LineId Id="339" Count="24" />
+      <LineId Id="642" Count="2" />
+      <LineId Id="689" Count="0" />
+      <LineId Id="364" Count="7" />
+      <LineId Id="632" Count="1" />
+      <LineId Id="635" Count="0" />
+      <LineId Id="637" Count="0" />
+      <LineId Id="372" Count="0" />
+      <LineId Id="604" Count="9" />
+      <LineId Id="647" Count="2" />
+      <LineId Id="646" Count="0" />
+      <LineId Id="373" Count="0" />
+      <LineId Id="692" Count="3" />
+      <LineId Id="699" Count="10" />
+      <LineId Id="697" Count="0" />
+      <LineId Id="710" Count="0" />
+      <LineId Id="712" Count="0" />
+      <LineId Id="698" Count="0" />
+      <LineId Id="696" Count="0" />
+      <LineId Id="713" Count="2" />
+      <LineId Id="719" Count="0" />
+      <LineId Id="727" Count="4" />
+      <LineId Id="717" Count="0" />
+      <LineId Id="769" Count="4" />
+      <LineId Id="718" Count="0" />
+      <LineId Id="716" Count="0" />
+      <LineId Id="374" Count="0" />
+      <LineId Id="376" Count="1" />
+      <LineId Id="691" Count="0" />
+      <LineId Id="378" Count="32" />
+      <LineId Id="776" Count="0" />
+      <LineId Id="411" Count="1" />
+      <LineId Id="782" Count="0" />
+      <LineId Id="780" Count="0" />
+      <LineId Id="570" Count="0" />
+      <LineId Id="787" Count="1" />
+      <LineId Id="571" Count="0" />
+      <LineId Id="789" Count="1" />
+      <LineId Id="785" Count="1" />
+      <LineId Id="784" Count="0" />
+      <LineId Id="783" Count="0" />
+      <LineId Id="417" Count="3" />
+      <LineId Id="631" Count="0" />
+      <LineId Id="781" Count="0" />
       <LineId Id="471" Count="0" />
       <LineId Id="421" Count="1" />
       <LineId Id="425" Count="2" />
       <LineId Id="492" Count="6" />
-      <LineId Id="501" Count="13" />
+      <LineId Id="501" Count="6" />
+      <LineId Id="514" Count="0" />
+      <LineId Id="818" Count="0" />
       <LineId Id="567" Count="0" />
-      <LineId Id="515" Count="14" />
-      <LineId Id="568" Count="0" />
-      <LineId Id="530" Count="4" />
+      <LineId Id="817" Count="0" />
+      <LineId Id="813" Count="1" />
+      <LineId Id="820" Count="0" />
+      <LineId Id="815" Count="1" />
+      <LineId Id="821" Count="0" />
+      <LineId Id="812" Count="0" />
+      <LineId Id="515" Count="10" />
+      <LineId Id="794" Count="0" />
+      <LineId Id="529" Count="0" />
+      <LineId Id="797" Count="0" />
+      <LineId Id="796" Count="0" />
+      <LineId Id="804" Count="2" />
+      <LineId Id="802" Count="1" />
+      <LineId Id="799" Count="2" />
+      <LineId Id="798" Count="0" />
+      <LineId Id="530" Count="1" />
+      <LineId Id="629" Count="0" />
+      <LineId Id="532" Count="2" />
       <LineId Id="569" Count="0" />
+      <LineId Id="630" Count="0" />
+      <LineId Id="810" Count="0" />
       <LineId Id="535" Count="1" />
       <LineId Id="456" Count="0" />
       <LineId Id="572" Count="1" />
       <LineId Id="457" Count="13" />
+      <LineId Id="615" Count="2" />
+      <LineId Id="650" Count="0" />
+      <LineId Id="652" Count="2" />
+      <LineId Id="651" Count="0" />
+      <LineId Id="618" Count="3" />
       <LineId Id="6" Count="0" />
     </LineIds>
   </POU>
