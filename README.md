@@ -6,3 +6,5 @@ El contenido forma parte del **Trabajo de Fin de Máster**, cuyo objetivo es dis
 ## Herramientas de software
 - **TwinCAT** → desarrollo del código.
 - **Factory I/O** → creación de escenas y ejecución de pruebas.
+- **Overleaf** → plataforma para redacción de la documentación en latex.
+
