@@ -32,30 +32,76 @@ VAR
 	tiempoTranscurrrido: TIME;
 	parado: BOOL; // variable que india que la secucnia paso por el etado de parado (se pulso stop)
 	tiempoRestante: DINT;
+	emergencia: BOOL;
+	luzBotonStart: BOOL;
+	luzBotonStop: BOOL;
+	luzBotonReset: BOOL;
+	tiempoCargaBarril: TIME;
+	cargandoTanque: BOOL;
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[// Enclavamiento del boton de start
-IF GVL_Inputs.Start_Button THEN
+      <ST><![CDATA[// Luces de los botones del cuadro
+// Solo se mantienen encendidas mientras estan pulsados
+luzBotonStart := FALSE;
+luzBotonStop := FALSE;
+luzBotonReset := FALSE;
+
+
+
+// Enclavamiento del boton de start
+IF GVLvars.Start_Button  AND emergencia = FALSE THEN
     Sistema_Activo := TRUE;
 	primeraVez := TRUE;
 	luzVerde := TRUE;
 	luzAmarilla := FALSE;
 	luzRoja := FALSE;
 	parado := FALSE;
+	emergencia := FALSE;
+	luzBotonStart := TRUE;
 END_IF
 
 // Boton Stop -> se para 
-IF NOT GVL_Inputs.StopButton THEN
-	 Sistema_Activo := FALSE;
+IF NOT GVLvars.StopButton AND emergencia = FALSE  THEN
+	Sistema_Activo := FALSE;
 	parado := TRUE;
 	luzVerde := FALSE;
 	luzAmarilla := TRUE;
 	luzRoja := FALSE;
-	tiempoTranscurrrido := Timer_Llenado.ET;
+	//tiempoTranscurrrido := Timer_Llenado.ET;
 	InicioLLenado := FALSE;
+	emergencia := FALSE;
+	luzBotonStop := TRUE;
 END_IF
  
+// Si se acciona la seta de emergencia se para todo
+IF GVLvars.seta = false  THEN
+	Sistema_Activo := FALSE;
+	parado := FALSE;
+	luzVerde := FALSE;
+	luzAmarilla := FALSE;
+	luzRoja := TRUE;
+	//tiempoTranscurrrido := Timer_Llenado.ET;
+	//InicioLLenado := FALSE;
+	emergencia := TRUE;
+END_IF
+
+// Si la seta no esta armada pero lo estuvo previamente 
+// se debe pulsar el boton de reset para reanudar la actividad 
+IF  GVLvars.seta AND emergencia THEN
+	IF GVLvars.resetBoton THEN
+		Sistema_Activo := TRUE;
+		//primeraVez := TRUE;
+		luzVerde := TRUE;
+		luzAmarilla := FALSE;
+		luzRoja := FALSE;
+		parado := FALSE;
+		emergencia := FALSE;
+		luzBotonReset := TRUE;
+	END_IF
+END_IF
+
+
 // se pretende que el tanuqe este siempre ente un 20-80%
 // si el tanuqe esta vacio se necesitan  39s para el 80% 
 // si el tanque esta al 20% se necesitan 31s para el 80%
@@ -66,18 +112,20 @@ IF primeraVez THEN
 //	tiempoRestante := TIME_TO_DINT(tiempoLLenado) - TIME_TO_DINT(tiempoTranscurrrido);
 //	tiempoLLenado := DINT_TO_TIME(tiempoRestante);
 ELSE 
-	tiempoLLenado := T#31S;
+	tiempoLLenado := T#32S;
 END_IF
 
 IF Sistema_Activo THEN
 	// Control inicial llenado tanque
 	Timer_Llenado(IN := InicioLLenado, PT := tiempoLLenado);
 	IF NOT Timer_Llenado.Q AND InicioLLenado THEN
-		GVL_Inputs.Fill_Valve := TRUE;           // Abrir valvula llenado
+		GVLvars.Fill_Valve := TRUE;           // Abrir valvula llenado
+		cargandoTanque := TRUE;
 	ELSE
-		GVL_Inputs.Fill_Valve := FALSE;          // Cerrar valvula llenado
+		GVLvars.Fill_Valve := FALSE;          // Cerrar valvula llenado
 		// Solo dejar de iniciar llenado después de completar timer
 		InicioLLenado := FALSE;
+		cargandoTanque := FALSE;
 	END_IF
 END_IF
 
@@ -101,18 +149,18 @@ END_IF
 //END_IF
 
 // Si el sistema esta activo
-IF Sistema_Activo  AND InicioLLenado=FALSE THEN
+IF Sistema_Activo  AND InicioLLenado=FALSE  AND emergencia = FALSE THEN
 	//La oprimera vez que se inica el programa se arrancan las cintas
 	IF primeraVez THEN
-		GVL_Inputs.Cinta_Entrada := TRUE;
-		GVL_Inputs.Cinta_Tanque  := TRUE;
-		GVL_Inputs.Cinta_Salida  := TRUE;
+		GVLvars.Cinta_Entrada := TRUE;
+		GVLvars.Cinta_Tanque  := TRUE;
+		GVLvars.Cinta_Salida  := TRUE;
 		primeraVez := FALSE;
 	END_IF
 
 
-Flanco_Subida := (NOT Sensor_Anterior) AND GVL_Inputs.Sensor_Tanque_Salida;
-Sensor_Anterior := GVL_Inputs.Sensor_Tanque_Salida;
+Flanco_Subida := (NOT Sensor_Anterior) AND GVLvars.Sensor_Tanque_Salida;
+Sensor_Anterior := GVLvars.Sensor_Tanque_Salida;
 
 
     // Máquina de estados
@@ -120,51 +168,61 @@ Sensor_Anterior := GVL_Inputs.Sensor_Tanque_Salida;
 
         // Estado 0: Esperando objeto en la boca del tanque
         0:
-            GVL_Inputs.Cinta_Entrada := TRUE;
-            GVL_Inputs.Cinta_Tanque  := TRUE;
-            GVL_Inputs.Cinta_Salida  := TRUE;
-            GVL_Inputs.Discharge_Valve := FALSE;
-            Timer_Descarga(IN := FALSE);
-
-            IF Flanco_Subida THEN
-                Estado := 1;
-            END_IF
+			//IF emergencia = FALSE AND cargandoTanque = FALSE THEN
+				GVLvars.Cinta_Entrada := TRUE;
+				GVLvars.Cinta_Tanque  := TRUE;
+				GVLvars.Cinta_Salida  := TRUE;
+				GVLvars.Discharge_Valve := FALSE;
+				Timer_Descarga(IN := FALSE);
+	
+				IF Flanco_Subida THEN
+					Estado := 1;
+				END_IF
+			//END_IF
+            
 
         //  Estado 1: Descargando (2 segundos)
         1:
-            GVL_Inputs.Cinta_Entrada := FALSE;
-            GVL_Inputs.Cinta_Tanque  := FALSE;
-            GVL_Inputs.Cinta_Salida  := FALSE;
-            GVL_Inputs.Discharge_Valve := TRUE;
+			// si no se encuentra se seta armada o esprando a rearme
+            //IF emergencia = FALSE AND cargandoTanque = FALSE THEN
+				GVLvars.Cinta_Entrada := FALSE;
+				GVLvars.Cinta_Tanque  := FALSE;
+				GVLvars.Cinta_Salida  := FALSE;
+				GVLvars.Discharge_Valve := TRUE;
+				
+				tiempoCargaBarril := CalculoTiempoLLenado(Volume_L :=709, Flow_Lps :=0.3543  );
+	
+				Timer_Descarga(IN := TRUE, PT := T#2s);
+	
+				IF Timer_Descarga.Q THEN
+					Timer_Descarga(IN := FALSE); // Detener timer
+					numDescargas := numDescargas + 1;
+					Estado := 2;
+				END_IF
+
+			//END_IF
 			
-			
-
-            Timer_Descarga(IN := TRUE, PT := T#2s);
-
-            IF Timer_Descarga.Q THEN
-                Timer_Descarga(IN := FALSE); // Detener timer
-				numDescargas := numDescargas + 1;
-                Estado := 2;
-            END_IF
-
         // Estado 2: Post-descarga - reactivar cintas
         2:
-			IF numDescargas < 16 THEN
-				GVL_Inputs.Discharge_Valve := FALSE;
-				GVL_Inputs.Cinta_Entrada := TRUE;
-				GVL_Inputs.Cinta_Tanque  := TRUE;
-				GVL_Inputs.Cinta_Salida  := TRUE;
-
-            Estado := 0; // Volver a esperar nuevo objeto
-			ELSE
-				GVL_Inputs.Discharge_Valve := FALSE;
-				GVL_Inputs.Cinta_Entrada := FALSE;
-				GVL_Inputs.Cinta_Tanque  := FALSE;
-				GVL_Inputs.Cinta_Salida  := FALSE;
-				InicioLLenado := TRUE;
-				numDescargas := 0;
-				Estado := 0; // Volver a esperar nuevo objeto
-			END_IF
+			//IF emergencia = FALSE THEN
+				IF numDescargas < 16 THEN
+					GVLvars.Discharge_Valve := FALSE;
+					GVLvars.Cinta_Entrada := TRUE;
+					GVLvars.Cinta_Tanque  := TRUE;
+					GVLvars.Cinta_Salida  := TRUE;
+	
+					Estado := 0; // Volver a esperar nuevo objeto
+				ELSE
+					GVLvars.Discharge_Valve := FALSE;
+					GVLvars.Cinta_Entrada := FALSE;
+					GVLvars.Cinta_Tanque  := FALSE;
+					GVLvars.Cinta_Salida  := FALSE;
+					InicioLLenado := TRUE;
+					numDescargas := 0;
+					Estado := 0; // Volver a esperar nuevo objeto
+				END_IF
+			//END_IF
+			
 			
 		
             
@@ -217,9 +275,9 @@ Sensor_Anterior := GVL_Inputs.Sensor_Tanque_Salida;
 
 ELSE
     // Sistema desactivado
-    GVL_Inputs.Cinta_Entrada := FALSE;
-    GVL_Inputs.Cinta_Tanque  := FALSE;
-    GVL_Inputs.Cinta_Salida  := FALSE;
+    GVLvars.Cinta_Entrada := FALSE;
+    GVLvars.Cinta_Tanque  := FALSE;
+    GVLvars.Cinta_Salida  := FALSE;
 //    GVL_Inputs.Fill_Valve := 0.0;
 //    GVL_Inputs.Discharge_Valve := 0.0;
     Timer_Descarga(IN := FALSE);
@@ -230,19 +288,29 @@ END_IF
 
 // ------------------------- Actualizar salidas -------------------------
 
-GVL_Inputs.luzAmarilla := luzAmarilla;
-GVL_Inputs.luzRoja := luzRoja;
-GVL_Inputs.luzVerde := luzVerde;
+GVLvars.luzAmarilla := luzAmarilla;
+GVLvars.luzRoja := luzRoja;
+GVLvars.luzVerde := luzVerde;
+GVLvars.luzBotonReset := luzBotonReset;
+GVLvars.luzBotonStart := luzBotonStart;
+GVLvars.luzBotonStop := luzBotonStop;
 
 
 
 ]]></ST>
     </Implementation>
     <LineIds Name="MAIN">
+      <LineId Id="1671" Count="1" />
+      <LineId Id="1674" Count="1" />
+      <LineId Id="1673" Count="0" />
+      <LineId Id="1676" Count="0" />
+      <LineId Id="1669" Count="1" />
       <LineId Id="1314" Count="3" />
       <LineId Id="1542" Count="1" />
       <LineId Id="1545" Count="0" />
       <LineId Id="1591" Count="0" />
+      <LineId Id="1645" Count="0" />
+      <LineId Id="1660" Count="0" />
       <LineId Id="1318" Count="0" />
       <LineId Id="1562" Count="0" />
       <LineId Id="1538" Count="0" />
@@ -252,8 +320,29 @@ GVL_Inputs.luzVerde := luzVerde;
       <LineId Id="1549" Count="1" />
       <LineId Id="1548" Count="0" />
       <LineId Id="1587" Count="1" />
+      <LineId Id="1644" Count="0" />
+      <LineId Id="1677" Count="0" />
       <LineId Id="1540" Count="0" />
-      <LineId Id="1563" Count="1" />
+      <LineId Id="1563" Count="0" />
+      <LineId Id="1635" Count="0" />
+      <LineId Id="1631" Count="0" />
+      <LineId Id="1636" Count="5" />
+      <LineId Id="1633" Count="0" />
+      <LineId Id="1642" Count="0" />
+      <LineId Id="1634" Count="0" />
+      <LineId Id="1650" Count="0" />
+      <LineId Id="1632" Count="0" />
+      <LineId Id="1651" Count="0" />
+      <LineId Id="1646" Count="0" />
+      <LineId Id="1648" Count="0" />
+      <LineId Id="1654" Count="5" />
+      <LineId Id="1652" Count="0" />
+      <LineId Id="1679" Count="0" />
+      <LineId Id="1653" Count="0" />
+      <LineId Id="1649" Count="0" />
+      <LineId Id="1647" Count="0" />
+      <LineId Id="1630" Count="0" />
+      <LineId Id="1564" Count="0" />
       <LineId Id="1569" Count="1" />
       <LineId Id="1597" Count="0" />
       <LineId Id="1565" Count="0" />
@@ -265,27 +354,29 @@ GVL_Inputs.luzVerde := luzVerde;
       <LineId Id="1568" Count="0" />
       <LineId Id="1566" Count="0" />
       <LineId Id="1319" Count="0" />
-      <LineId Id="1576" Count="7" />
+      <LineId Id="1576" Count="3" />
+      <LineId Id="1746" Count="0" />
+      <LineId Id="1580" Count="3" />
+      <LineId Id="1747" Count="0" />
       <LineId Id="1574" Count="1" />
       <LineId Id="1585" Count="1" />
       <LineId Id="1584" Count="0" />
       <LineId Id="1328" Count="25" />
       <LineId Id="1510" Count="1" />
       <LineId Id="1508" Count="1" />
-      <LineId Id="1413" Count="22" />
-      <LineId Id="1476" Count="1" />
-      <LineId Id="1436" Count="4" />
-      <LineId Id="1505" Count="0" />
-      <LineId Id="1441" Count="4" />
-      <LineId Id="1479" Count="0" />
-      <LineId Id="1482" Count="4" />
-      <LineId Id="1480" Count="0" />
-      <LineId Id="1500" Count="0" />
-      <LineId Id="1503" Count="0" />
-      <LineId Id="1501" Count="1" />
-      <LineId Id="1489" Count="1" />
-      <LineId Id="1506" Count="0" />
-      <LineId Id="1504" Count="0" />
+      <LineId Id="1413" Count="6" />
+      <LineId Id="1700" Count="0" />
+      <LineId Id="1703" Count="7" />
+      <LineId Id="1701" Count="1" />
+      <LineId Id="1428" Count="3" />
+      <LineId Id="1699" Count="0" />
+      <LineId Id="1432" Count="0" />
+      <LineId Id="1685" Count="13" />
+      <LineId Id="1683" Count="1" />
+      <LineId Id="1443" Count="2" />
+      <LineId Id="1712" Count="0" />
+      <LineId Id="1730" Count="14" />
+      <LineId Id="1713" Count="1" />
       <LineId Id="1481" Count="0" />
       <LineId Id="1487" Count="0" />
       <LineId Id="1496" Count="0" />
@@ -296,6 +387,8 @@ GVL_Inputs.luzVerde := luzVerde;
       <LineId Id="1559" Count="0" />
       <LineId Id="1558" Count="0" />
       <LineId Id="1560" Count="1" />
+      <LineId Id="1661" Count="0" />
+      <LineId Id="1680" Count="1" />
       <LineId Id="1555" Count="2" />
       <LineId Id="104" Count="0" />
     </LineIds>

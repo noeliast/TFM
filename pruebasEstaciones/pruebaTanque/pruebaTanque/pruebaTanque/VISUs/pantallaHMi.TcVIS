@@ -20,7 +20,7 @@
                         </o>
                         <o>
                           <v n="Id">1186196937L</v>
-                          <v n="Value">"GVL_Inputs.Start_Button"</v>
+                          <v n="Value">"GVLvars.Start_Button"</v>
                         </o>
                       </l>
                     </o>
@@ -204,7 +204,7 @@
                         </o>
                         <o>
                           <v n="Id">1186196937L</v>
-                          <v n="Value">"GVL_Inputs.StopButton"</v>
+                          <v n="Value">"GVLvars.StopButton"</v>
                         </o>
                       </l>
                     </o>
@@ -384,7 +384,7 @@
                       <l n="VisualElemMemberList" t="VisualElemMemberCollection" cet="VisualElemMember">
                         <o>
                           <v n="Id">1186196937L</v>
-                          <v n="Value">"GVL_Inputs.Fill_Valve"</v>
+                          <v n="Value">"GVLvars.Fill_Valve"</v>
                         </o>
                       </l>
                     </o>
@@ -564,7 +564,7 @@
                       <l n="VisualElemMemberList" t="VisualElemMemberCollection" cet="VisualElemMember">
                         <o>
                           <v n="Id">1186196937L</v>
-                          <v n="Value">"GVL_Inputs.Discharge_Valve"</v>
+                          <v n="Value">"GVLvars.Discharge_Valve"</v>
                         </o>
                       </l>
                     </o>

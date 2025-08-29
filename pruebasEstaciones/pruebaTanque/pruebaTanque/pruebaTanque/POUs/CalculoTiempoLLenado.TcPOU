@@ -8,20 +8,43 @@ VAR_INPUT
 END_VAR
 VAR
     msTime : UDINT;
+	sTime: DINT;
+	Flow_m3ps: REAL;
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[// Tiempo llenado = (volumen barril / caudal tanque)
+//IF Flow_Lps > 0 THEN
+//    msTime := TRUNC(Volume_L / Flow_Lps * 1000); // milisegundos
+//ELSE
+//    msTime := 0;
+//END_IF
+
+//CalculoTiempoLLenado := T#0MS + msTime * T#1MS; // suma de TIME
+
+// Conversión de caudal: m³/s → L/s
+// 1 m³/s = 1000 L/s
+Flow_Lps := Flow_m3ps * 1000;
+
 IF Flow_Lps > 0 THEN
-    msTime := TRUNC(Volume_L / Flow_Lps * 1000); // milisegundos
+    sTime := TRUNC(Volume_L / Flow_Lps); // segundos
 ELSE
-    msTime := 0;
+    sTime := 0;
 END_IF
 
-CalculoTiempoLLenado := T#0MS + msTime * T#1MS; // suma de TIME]]></ST>
+CalculoTiempoLLenado := T#0S + sTime * T#1S; // ahora suma en segundos
+
+
+]]></ST>
     </Implementation>
     <LineIds Name="CalculoTiempoLLenado">
       <LineId Id="16" Count="7" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="45" Count="2" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="37" Count="6" />
+      <LineId Id="35" Count="1" />
+      <LineId Id="32" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

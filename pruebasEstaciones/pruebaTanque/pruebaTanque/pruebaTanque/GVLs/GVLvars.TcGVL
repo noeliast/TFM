@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <GVL Name="GVLvars" Id="{2126263c-2017-4a03-b1c0-1bc542fea6bc}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	
+	// CUADRO
+	{attribute 'OPC.UA.DA' := '1'}
+	Start_Button : BOOL;  // Boton de arranque
+	{attribute 'OPC.UA.DA' := '1'}
+	StopButton : BOOL; // Boton de paro
+	{attribute 'OPC.UA.DA' := '1'}
+	luzVerde : BOOL; // luz verde stack
+	{attribute 'OPC.UA.DA' := '1'}
+	luzAmarilla : BOOL; // luz amarilla stack
+	{attribute 'OPC.UA.DA' := '1'}
+ 	luzRoja : BOOL; // luz roja stack
+	{attribute 'OPC.UA.DA' := '1'}
+	luzBotonStop : BOOL; // luz del boton de stop 
+	{attribute 'OPC.UA.DA' := '1'}
+	luzBotonStart : BOOL; // luz del boton de start
+	{attribute 'OPC.UA.DA' := '1'}
+	luzBotonReset : BOOL; // luz boton start
+	{attribute 'OPC.UA.DA' := '1'}
+	seta : BOOL; // seta de emergencia
+	{attribute 'OPC.UA.DA' := '1'}
+	resetBoton : BOOL; // Boton de reset (tras rearme de seta)
+	
+	
+	// SENSORES
+	{attribute 'OPC.UA.DA' := '1'}   
+	Sensor_Tanque_Salida : BOOL;       // Sensor fotoeléctrico justo antes del tanque
+//	{attribute 'OPC.UA.DA' := '1'}    
+//	Sensor_Barril_Listo  : BOOL;       // Sensor que detecta barril en posición
+	//	 {attribute 'OPC.UA.DA' := '1'}    
+	
+
+	// TANQUE
+	//	Level_Meter          : REAL;       // Nivel del tanque (0-10 V)
+	{attribute 'OPC.UA.DA' := '1'}
+	// Valvulas tanque
+	{attribute 'OPC.UA.DA' := '1'}    
+	Fill_Valve           : BOOL;       // Válvula de llenado (0–10 V)
+	{attribute 'OPC.UA.DA' := '1'}    
+	Discharge_Valve      : BOOL;       // Válvula de salida (0–10 V)
+	
+	
+	
+	// CINTAS
+	{attribute 'OPC.UA.DA' := '1'}    
+	Cinta_Entrada        : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}    
+	Cinta_Tanque         : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}    
+	Cinta_Salida         : BOOL;
+	
+
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>
