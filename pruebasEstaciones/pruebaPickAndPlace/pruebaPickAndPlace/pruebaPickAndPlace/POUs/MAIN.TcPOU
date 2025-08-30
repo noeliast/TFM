@@ -28,6 +28,7 @@ VAR
 	luzStart: BOOL;
 	luzReset: BOOL;
 	emergencia: BOOL;
+	ProductoFinal: BOOL;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -38,8 +39,6 @@ luzReset := FALSE;
 //Si se pulsa el boton de start se arrancan als cintas
 IF GVLvars.botonStart AND NOT emergencia THEN
 	sistemaActivo := TRUE;
-	cintaBase := TRUE;
-	cintaTapa := TRUE;
 	luzVerde := TRUE;
 	luzNaranja := FALSE;
 	luzRojo := FALSE;
@@ -85,6 +84,12 @@ IF  GVLvars.seta AND emergencia THEN
 END_IF
 
 IF sistemaActivo AND emergencia = FALSE THEN
+	
+	IF baseOK = FALSE AND tapaOK = FALSE THEN
+		cintaBase := TRUE;
+	cintaTapa := TRUE;
+	END_IF
+	
 	flancoTapa(CLK:=GVLvars.sensorFotoTapa);
 	flancoBase(CLK:= GVLvars.sensorFotoBase);
 	
@@ -113,7 +118,9 @@ IF sistemaActivo AND emergencia = FALSE THEN
 	// --- Maquina de estados Pick & Place ---
 	CASE EstadoPickPlace OF
 	
-		0: // Inicio - piezas posicionadas y abrazaderas cerradas
+		0: 
+			
+			// Inicio - piezas posicionadas y abrazaderas cerradas
 			IF baseOK AND tapaOK AND GVLvars.limiteSujeccionBase AND GVLvars.limiteSujeccionTapa THEN
 				EstadoPickPlace := 1;
 			END_IF
@@ -122,7 +129,7 @@ IF sistemaActivo AND emergencia = FALSE THEN
 			GVLvars.PickPlace_MoverZ := FALSE; // vertical
 			GVLvars.PickPlace_MoverX := TRUE; //  horizontal
 			GVLvars.PickPlace_Agarrar := FALSE; // ventosa
-	
+			ProductoFinal := FALSE;
 
 			// EBERIA SER CON FLANCOS
 			// si esta comletamnte extentida horizontalmente -> siguiente estao
@@ -246,6 +253,8 @@ IF sistemaActivo AND emergencia = FALSE THEN
 			GVLvars.levantarAbrazaderaTapa := TRUE;
 			cintaBase := TRUE;
 			cintaTapa := TRUE;
+			ProductoFinal := TRUE;
+			
 			//Si lla paso la barrera posicionadora
 			IF GVLvars.sensorPostSellado THEN
 				GVLvars.levantarAbrazaderaTapa := FALSE;
@@ -284,7 +293,8 @@ GVLvars.luzReset := luzReset;
     <LineIds Name="MAIN">
       <LineId Id="962" Count="1" />
       <LineId Id="960" Count="1" />
-      <LineId Id="715" Count="25" />
+      <LineId Id="715" Count="2" />
+      <LineId Id="720" Count="20" />
       <LineId Id="966" Count="0" />
       <LineId Id="743" Count="4" />
       <LineId Id="964" Count="0" />
@@ -292,7 +302,16 @@ GVLvars.luzReset := luzReset;
       <LineId Id="756" Count="4" />
       <LineId Id="959" Count="0" />
       <LineId Id="965" Count="0" />
-      <LineId Id="761" Count="197" />
+      <LineId Id="761" Count="3" />
+      <LineId Id="1001" Count="2" />
+      <LineId Id="1005" Count="0" />
+      <LineId Id="1004" Count="0" />
+      <LineId Id="1006" Count="0" />
+      <LineId Id="765" Count="28" />
+      <LineId Id="998" Count="1" />
+      <LineId Id="794" Count="131" />
+      <LineId Id="995" Count="1" />
+      <LineId Id="926" Count="32" />
       <LineId Id="410" Count="0" />
     </LineIds>
   </POU>
