@@ -40,6 +40,9 @@ VAR
 	objetoPosicionDescarteP: BOOL;
 	peso: REAL;
 	sinComparar: BOOL := false;
+	azul: BOOL;
+	metal: BOOL;
+	verde: BOOL;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -167,6 +170,9 @@ IF enclaveStart AND NOT emergencia THEN
 		ELSE
 			descarteXcolor := TRUE;
 		END_IF
+		azul := GVLvars.sVision = 3;
+		metal := GVLvars.sVision = 9;
+		verde := GVLvars.sVision = 6;
 		cintaVision := TRUE; // Reanuda la marcha
 		
 	END_IF
@@ -329,7 +335,10 @@ GVLvars.luzBotonStart := luzStart;
       <LineId Id="374" Count="0" />
       <LineId Id="376" Count="1" />
       <LineId Id="691" Count="0" />
-      <LineId Id="378" Count="32" />
+      <LineId Id="378" Count="20" />
+      <LineId Id="870" Count="1" />
+      <LineId Id="869" Count="0" />
+      <LineId Id="399" Count="11" />
       <LineId Id="776" Count="0" />
       <LineId Id="411" Count="1" />
       <LineId Id="782" Count="0" />
