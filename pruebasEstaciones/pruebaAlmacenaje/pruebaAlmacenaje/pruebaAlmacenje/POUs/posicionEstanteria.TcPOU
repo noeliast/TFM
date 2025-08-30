@@ -15,7 +15,8 @@ VAR
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[encontrado  := FALSE;
+      <ST><![CDATA[
+encontrado  := FALSE;
 FOR fila := 1 TO 6 DO
     FOR col := 1 TO 3 DO
         // la primera posicion libre 
@@ -32,6 +33,7 @@ END_FOR
 ]]></ST>
     </Implementation>
     <LineIds Name="posicionEstanteria">
+      <LineId Id="76" Count="0" />
       <LineId Id="57" Count="0" />
       <LineId Id="20" Count="2" />
       <LineId Id="30" Count="0" />
