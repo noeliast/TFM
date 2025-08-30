@@ -15,7 +15,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{08747BB0-6C48-462F-97E7-C9E669A4929E}" Name="pruebaPaletizada" PrjFilePath="pruebaPaletizada\pruebaPaletizada.plcproj" TmcFilePath="pruebaPaletizada\pruebaPaletizada.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" CopyTmcToTarget="true" CopyTpyToTarget="false" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="pruebaPaletizada\pruebaPaletizada.tmc" TmcHash="{2D7FCC83-28C4-8F81-30AC-C77C6455C668}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="pruebaPaletizada\pruebaPaletizada.tmc" TmcHash="{6960E10F-CE96-B15B-A365-B0B4AF949949}">
 					<Name>pruebaPaletizada Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Contexts>

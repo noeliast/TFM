@@ -64,6 +64,11 @@ VAR
 	luzReset: BOOL;
 	mesaCargada: BOOL;
 	girandoMesa: BOOL;
+	timerBajadaPalet: TON;
+	startTimerPalet: BOOL;
+	timerSubidaPalet: TON;
+	flancoBasePalet : R_trig;
+	saliendo: BOOL;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -177,14 +182,17 @@ IF enclaveStart AND NOT emergencia THEN
 	END_IF
 
 	// Si se dispone de una columna (2 elementos) se empuja hacia el plato
-	IF contadorVector = 2 THEN
+	IF contadorVector = 2 AND paletListo THEN
 		startTimerVector := TRUE;
+		
 	END_IF
 	timerVector(IN := startTimerVector, PT:=T#2S);
 		
 	IF timerVector.Q THEN
 		esperaPusher := TRUE;
 		startTimerVector := FALSE;
+		cintaEntradaMaterial := FALSE;
+		cintaInclinadaMaterial := FALSE;
 	END_IF
 	
 	flancoPusher(CLK:=GVLvars.pusherLimit);
@@ -192,8 +200,8 @@ IF enclaveStart AND NOT emergencia THEN
 	IF esperaPusher THEN
 		beltPositive := FALSE;
 		pusher := TRUE;
-		cintaEntradaMaterial := FALSE;
-		cintaInclinadaMaterial := FALSE;
+//		cintaEntradaMaterial := FALSE;
+//		cintaInclinadaMaterial := FALSE;
 		
 		//Si el cilindro se extendio de todo (empujo completamente al plato)
 		IF flancoPusher.Q THEN
@@ -255,13 +263,16 @@ IF enclaveStart AND NOT emergencia THEN
 	
 	 IF  flancoEntradaPalets.Q THEN 
 		 chainPositive := TRUE;
+		 saliendo := FALSE;
 	 END_IF
 	 
-	 IF GVLvars.elevatorFrontLimit THEN
+	 IF GVLvars.elevatorFrontLimit AND PaletListo = FALSE and saliendo = false THEN
 		 chainPositive := FALSE;
 		 elevatorToLimit := TRUE;
 		 elevatorUp := TRUE;
 		 PaletListo := TRUE;
+		 elevatorDown := FALSE;
+		 openPlate := FALSE; // mieentras no este arriba el palet no se abre el plato
 		 
 	 END_IF
 	 
@@ -275,27 +286,37 @@ IF enclaveStart AND NOT emergencia THEN
 		//timerOpenPlate(IN:=openPlate, PT:= T#2S); // se espera a que este completamente abierto
 		// si las compuertas del plato estan completamente abiertas
 		IF flancoPlato.Q THEN
-			elevatorToLimit := FALSE; // se desactiva la senal de subida del palet
+			elevatorToLimit := TRUE; // se desactiva la senal de subida del palet
 			elevatorUp := FALSE; 
+			//paletListo := FALSE;
 			elevatorDown := TRUE; //  se activa la senal de bajada
 			paletizadoListo := TRUE;
 			openPlate := FALSE;
 			cintaEntradaMaterial := TRUE;
 			cintaInclinadaMaterial := TRUE;
+			MatrizElemLista := FALSE;
+			
 		END_IF
 	END_IF
-	 
-	
+	 flancoBasePalet(CLK:=GVLvars.sBasePalet);
+	//timerBajadaPalet(IN:=paletizadoListo, PT:=T#2S);
 	// Si el palet esta cargado con los materiales se dirige hacia el remover
-	IF paletizadoListo THEN
+	IF flancoBasePalet.Q THEN
 		chainPositive := TRUE;
 		cintaSalida := TRUE;
-		IF GVLvars.sPostPaletizado THEN
+		elevatorToLimit := FALSE; // se desactiva la senal de subida del palet
+		elevatorUp := FALSE; 
+		elevatorDown := FALSE; //  se activa la senal de bajada
+		
+	END_IF
+	
+	IF GVLvars.sPostPaletizado THEN
 			chainPositive := FALSE;	
 			paletizadoListo := FALSE;
 			paletListo := FALSE;
+			openPlate := FALSE;
+			saliendo := TRUE;
 		END_IF	
-	END_IF
 END_IF
 // --------------------------- Actualizar salidas ---------------------------
 
@@ -377,7 +398,11 @@ GVLvars.elevatorToLimit := elevatorToLimit;
       <LineId Id="2467" Count="0" />
       <LineId Id="2645" Count="0" />
       <LineId Id="2748" Count="0" />
-      <LineId Id="2646" Count="35" />
+      <LineId Id="2646" Count="7" />
+      <LineId Id="2915" Count="0" />
+      <LineId Id="2654" Count="5" />
+      <LineId Id="2916" Count="1" />
+      <LineId Id="2660" Count="21" />
       <LineId Id="2531" Count="8" />
       <LineId Id="2805" Count="1" />
       <LineId Id="2540" Count="1" />
@@ -388,7 +413,28 @@ GVLvars.elevatorToLimit := elevatorToLimit;
       <LineId Id="2551" Count="7" />
       <LineId Id="2812" Count="0" />
       <LineId Id="2820" Count="0" />
-      <LineId Id="2559" Count="85" />
+      <LineId Id="2559" Count="6" />
+      <LineId Id="2913" Count="0" />
+      <LineId Id="2566" Count="6" />
+      <LineId Id="2905" Count="0" />
+      <LineId Id="2903" Count="0" />
+      <LineId Id="2892" Count="0" />
+      <LineId Id="2574" Count="13" />
+      <LineId Id="2896" Count="0" />
+      <LineId Id="2588" Count="4" />
+      <LineId Id="2914" Count="0" />
+      <LineId Id="2894" Count="0" />
+      <LineId Id="2593" Count="7" />
+      <LineId Id="2908" Count="1" />
+      <LineId Id="2907" Count="0" />
+      <LineId Id="2906" Count="0" />
+      <LineId Id="2606" Count="0" />
+      <LineId Id="2897" Count="0" />
+      <LineId Id="2899" Count="3" />
+      <LineId Id="2904" Count="0" />
+      <LineId Id="2911" Count="0" />
+      <LineId Id="2898" Count="0" />
+      <LineId Id="2607" Count="37" />
       <LineId Id="32" Count="0" />
     </LineIds>
   </POU>

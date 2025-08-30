@@ -38,7 +38,10 @@ VAR_GLOBAL
 	{attribute 'OPC.UA.DA' := '1'}
 	sPostPaletizado : BOOL;
 	{attribute 'OPC.UA.DA' := '1'}
-	sEntradaPaletEnEstacion : bool;
+	sEntradaPaletEnEstacion : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	sBasePalet : BOOL ;
+	
 
 	// Cintas
 	{attribute 'OPC.UA.DA' := '1'}
