@@ -5,7 +5,7 @@
 VAR
 	enclaveStart: BOOL;
 	timerColumna: TON;
-	posicionEst : ARRAY[1..2] OF REAL;
+	posicionEst : ARRAY[1..4] OF REAL;
 	distBaldas : distanciaBaldas();
 	iniPosOcupEst : inicializarPosOcupEstanteria();
 	cargando: BOOL;
@@ -43,6 +43,9 @@ VAR
 	seta : bool;
 	botonStart: BOOL;
 	botonStop: BOOL;
+	filaEstanteria: INT;
+	colEstanteria: INT;
+	moving: REAL;
 END_VAR
 
 VAR PERSISTENT
@@ -85,7 +88,7 @@ IF NOT GVLvar.botonStop AND NOT emergencia THEN
 END_IF
 
 
-IF  GVLvar.seta THEN
+IF  NOT GVLvar.seta THEN
 	luzRoja:= TRUE;
 	luzVerde := FALSE;
 	luzAmarilla := FALSE;
@@ -97,7 +100,7 @@ IF  GVLvar.seta THEN
 END_IF
 
 
-IF NOT GVLvar.seta AND emergencia THEN
+IF  GVLvar.seta AND emergencia THEN
 	IF GVLvar.botonReset THEN
 		emergencia := FALSE;
 		cinta := TRUE;
@@ -165,45 +168,55 @@ IF enclaveStart THEN
 		4:
 			IF elemCargado AND GVLvar.forkMiddleLimit THEN 
 				posicionEst := posicionEstanteria();
-				setPointX := posicionEst[1];   // columna (X)
-				posicionEst[2]:=posicionEst[2] + incfementoBaizadaH;
-				setPointZ := posicionEst[2];   // fila (Z)
-				elemCargado := FALSE;
-				descargandoElem := TRUE;
-				state := 5;
+				// Si devuelve una posicion valida
+				IF posicionEst[1]<>0 AND posicionEst[2]<>0 THEN
+					setPointX := posicionEst[1];   // columna (X)
+					setPointZ := posicionEst[2]+0.4;   // fila (Z)
+					filaEstanteria := TO_INT(posicionEst[3]);
+					colEstanteria := TO_INT(posicionEst[4]);
+					elemCargado := FALSE;
+					descargandoElem := TRUE;
+					state := 5;
+				END_IF
 			END_IF
 	
 		// 5. Esperar llegar a destino
 		5:
 			 movingX := (GVLvar.movingX = posicionEst[1]) OR (GVLvar.movingX > (posicionEst[1]-0.05) AND GVLvar.movingX < posicionEst[1]) OR (GVLvar.movingX < (posicionEst[1]+0.05)AND GVLvar.movingX > posicionEst[1]) ;
-			 movingZ := (GVLvar.movingZ = posicionEst[2]) OR (GVLvar.movingZ > (posicionEst[2]-0.05) AND GVLvar.movingZ < posicionEst[2]) OR (GVLvar.movingZ < (posicionEst[2]+0.05) AND GVLvar.movingZ > posicionEst[2]);
+			 movingZ := (GVLvar.movingZ = posicionEst[2]+0.4) OR (GVLvar.movingZ > (posicionEst[2]-0.05+0.4) AND GVLvar.movingZ < posicionEst[2]+0.4) OR (GVLvar.movingZ < (posicionEst[2]+0.05+0.4) AND GVLvar.movingZ > posicionEst[2]+0.4);
 			 
 			 
 			IF movingZ AND movingX AND descargandoElem THEN
-				setPointZ := GVLvar.movingZ -incfementoBaizadaH ;
+				GVLvar.moveForksLeft := TRUE;
 				bajarHorquilla := TRUE;
 				state := 6;
 			END_IF
 			
 			
 		6:	
-			timerBajarHorquilla (IN:= bajarHorquilla, PT:=T#2S);
-			posmovingZ := GVLvar.movingZ;	
-			enPosicoin  := (posmovingZ = posicionEst[2]-incfementoBaizadaH) OR (posmovingZ > (posicionEst[2]-incfementoBaizadaH -0.05) AND posmovingZ < posicionEst[2]-incfementoBaizadaH) OR (posmovingZ < (posicionEst[2]-incfementoBaizadaH+0.05) AND posmovingZ > posicionEst[2]-incfementoBaizadaH);
-			 
-			IF timerBajarHorquilla.Q AND enPosicoin THEN 
-				GVLvar.moveForksLeft := TRUE;
+			//timerBajarHorquilla (IN:= bajarHorquilla, PT:=T#2S);
+			
+			//IF  enPosicoin AND GVLvar.forkMiddleLimit THEN  
+			IF GVLvar.forkLeftLimit THEN
+				 moving := GVLvar.movingZ;
+				IF moving > 0 THEN 
+					setPointZ := GVLvar.movingZ - incfementoBaizadaH ;	
+				END_IF
 				descargandoElem := FALSE;
 				bajarHorquilla := FALSE;
-				state := 6;
+				state := 7;
 			END_IF
+			
 		// 6. Horquilla descargando
 		7:
-			IF GVLvar.forkLeftLimit THEN
-            GVLvar.moveForksLeft := FALSE;
-            elemDescargado := TRUE;
-            state := 8;
-        END_IF
+			posmovingZ := GVLvar.movingZ;	
+			enPosicoin  := (posmovingZ = posicionEst[2]) OR (posmovingZ > (posicionEst[2] -0.05) AND posmovingZ < posicionEst[2]) OR (posmovingZ < (posicionEst[2]+0.05) AND posmovingZ > posicionEst[2]);
+			 
+			IF GVLvar.forkLeftLimit AND enPosicoin THEN
+				GVLvar.moveForksLeft := FALSE;
+				elemDescargado := TRUE;
+				state := 8;
+       		END_IF
 			
 		
 			
@@ -257,114 +270,21 @@ GVLvar.cintaTransportadoraPalet := cintaTransportadoraPalet;
 ]]></ST>
     </Implementation>
     <LineIds Name="MAIN">
-      <LineId Id="539" Count="1" />
-      <LineId Id="482" Count="1" />
-      <LineId Id="485" Count="0" />
-      <LineId Id="487" Count="0" />
-      <LineId Id="541" Count="0" />
-      <LineId Id="484" Count="0" />
-      <LineId Id="543" Count="2" />
-      <LineId Id="542" Count="0" />
-      <LineId Id="316" Count="0" />
-      <LineId Id="490" Count="2" />
-      <LineId Id="494" Count="0" />
-      <LineId Id="317" Count="1" />
-      <LineId Id="355" Count="0" />
-      <LineId Id="319" Count="2" />
-      <LineId Id="208" Count="0" />
-      <LineId Id="324" Count="1" />
-      <LineId Id="497" Count="0" />
-      <LineId Id="500" Count="1" />
-      <LineId Id="499" Count="0" />
-      <LineId Id="328" Count="0" />
-      <LineId Id="326" Count="0" />
-      <LineId Id="356" Count="0" />
-      <LineId Id="329" Count="0" />
-      <LineId Id="536" Count="0" />
-      <LineId Id="502" Count="1" />
-      <LineId Id="513" Count="1" />
-      <LineId Id="512" Count="0" />
-      <LineId Id="506" Count="0" />
-      <LineId Id="520" Count="0" />
-      <LineId Id="515" Count="0" />
-      <LineId Id="521" Count="1" />
-      <LineId Id="507" Count="0" />
-      <LineId Id="537" Count="0" />
-      <LineId Id="508" Count="0" />
-      <LineId Id="504" Count="0" />
-      <LineId Id="527" Count="0" />
-      <LineId Id="530" Count="2" />
-      <LineId Id="528" Count="0" />
-      <LineId Id="533" Count="2" />
-      <LineId Id="529" Count="0" />
-      <LineId Id="510" Count="0" />
-      <LineId Id="538" Count="0" />
-      <LineId Id="505" Count="0" />
-      <LineId Id="330" Count="0" />
-      <LineId Id="323" Count="0" />
-      <LineId Id="331" Count="1" />
-      <LineId Id="209" Count="11" />
-      <LineId Id="334" Count="0" />
-      <LineId Id="333" Count="0" />
-      <LineId Id="221" Count="4" />
-      <LineId Id="357" Count="0" />
-      <LineId Id="226" Count="6" />
-      <LineId Id="360" Count="0" />
-      <LineId Id="394" Count="0" />
-      <LineId Id="236" Count="0" />
-      <LineId Id="438" Count="0" />
-      <LineId Id="392" Count="0" />
-      <LineId Id="368" Count="0" />
-      <LineId Id="439" Count="0" />
-      <LineId Id="363" Count="0" />
-      <LineId Id="390" Count="0" />
-      <LineId Id="366" Count="0" />
-      <LineId Id="447" Count="0" />
-      <LineId Id="449" Count="1" />
-      <LineId Id="365" Count="0" />
-      <LineId Id="440" Count="1" />
-      <LineId Id="445" Count="1" />
-      <LineId Id="443" Count="0" />
-      <LineId Id="237" Count="5" />
-      <LineId Id="417" Count="0" />
-      <LineId Id="243" Count="7" />
-      <LineId Id="290" Count="0" />
-      <LineId Id="399" Count="0" />
-      <LineId Id="398" Count="0" />
-      <LineId Id="457" Count="0" />
-      <LineId Id="251" Count="0" />
-      <LineId Id="458" Count="0" />
-      <LineId Id="464" Count="0" />
-      <LineId Id="479" Count="0" />
-      <LineId Id="255" Count="0" />
-      <LineId Id="463" Count="0" />
-      <LineId Id="474" Count="0" />
-      <LineId Id="468" Count="0" />
-      <LineId Id="476" Count="2" />
-      <LineId Id="475" Count="0" />
-      <LineId Id="256" Count="0" />
-      <LineId Id="461" Count="1" />
-      <LineId Id="466" Count="0" />
-      <LineId Id="459" Count="1" />
-      <LineId Id="257" Count="1" />
-      <LineId Id="451" Count="3" />
-      <LineId Id="436" Count="0" />
-      <LineId Id="421" Count="0" />
-      <LineId Id="406" Count="0" />
-      <LineId Id="264" Count="6" />
-      <LineId Id="288" Count="0" />
-      <LineId Id="358" Count="0" />
-      <LineId Id="271" Count="14" />
-      <LineId Id="8" Count="0" />
-      <LineId Id="547" Count="3" />
-      <LineId Id="555" Count="1" />
-      <LineId Id="551" Count="1" />
-      <LineId Id="557" Count="4" />
-      <LineId Id="546" Count="0" />
-      <LineId Id="562" Count="0" />
-      <LineId Id="566" Count="1" />
-      <LineId Id="583" Count="3" />
-      <LineId Id="569" Count="1" />
+      <LineId Id="633" Count="115" />
+      <LineId Id="849" Count="0" />
+      <LineId Id="841" Count="0" />
+      <LineId Id="845" Count="1" />
+      <LineId Id="896" Count="1" />
+      <LineId Id="847" Count="1" />
+      <LineId Id="843" Count="1" />
+      <LineId Id="755" Count="19" />
+      <LineId Id="901" Count="0" />
+      <LineId Id="900" Count="0" />
+      <LineId Id="905" Count="0" />
+      <LineId Id="904" Count="0" />
+      <LineId Id="909" Count="1" />
+      <LineId Id="908" Count="0" />
+      <LineId Id="779" Count="61" />
       <LineId Id="565" Count="0" />
     </LineIds>
   </POU>

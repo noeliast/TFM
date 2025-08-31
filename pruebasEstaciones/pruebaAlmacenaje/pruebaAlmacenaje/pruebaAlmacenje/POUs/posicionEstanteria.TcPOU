@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
   <POU Name="posicionEstanteria" Id="{07b97f28-9015-4126-8fa4-be169375519b}" SpecialFunc="None">
-    <Declaration><![CDATA[FUNCTION posicionEstanteria : Array[1..2] of real
+    <Declaration><![CDATA[FUNCTION posicionEstanteria : Array[1..4] of real
 VAR_INPUT
 END_VAR
 VAR
@@ -15,37 +15,32 @@ VAR
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[
-encontrado  := FALSE;
+      <ST><![CDATA[encontrado  := FALSE;
 FOR fila := 1 TO 6 DO
     FOR col := 1 TO 3 DO
         // la primera posicion libre 
 		IF GVLvar.baldasOcupadas[fila,col] = FALSE  AND encontrado = FALSE THEN
-			posicionEstanteria := GVLvar.estanteria[fila,col];
+			posicionEstanteria[1] := GVLvar.estanteria[fila,col][1];
+			posicionEstanteria[2] := GVLvar.estanteria[fila,col][2];
+			posicionEstanteria[3] := TO_REAL(fila) ;
+			posicionEstanteria[4] := TO_REAL(col);
+			
 			GVLvar.baldasOcupadas[fila,col] := TRUE;
 			encontrado := TRUE;
 			EXIT;
+//		ELSE 
+//			posicionEstanteria := [0,0];
 		END_IF
     END_FOR
-END_FOR
-
-
-]]></ST>
+END_FOR]]></ST>
     </Implementation>
     <LineIds Name="posicionEstanteria">
-      <LineId Id="76" Count="0" />
-      <LineId Id="57" Count="0" />
-      <LineId Id="20" Count="2" />
-      <LineId Id="30" Count="0" />
-      <LineId Id="28" Count="0" />
-      <LineId Id="43" Count="0" />
-      <LineId Id="55" Count="0" />
-      <LineId Id="31" Count="0" />
-      <LineId Id="29" Count="0" />
-      <LineId Id="24" Count="0" />
-      <LineId Id="7" Count="0" />
-      <LineId Id="59" Count="0" />
-      <LineId Id="63" Count="0" />
+      <LineId Id="89" Count="5" />
+      <LineId Id="115" Count="2" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="95" Count="2" />
+      <LineId Id="100" Count="1" />
+      <LineId Id="98" Count="1" />
       <LineId Id="58" Count="0" />
     </LineIds>
   </POU>

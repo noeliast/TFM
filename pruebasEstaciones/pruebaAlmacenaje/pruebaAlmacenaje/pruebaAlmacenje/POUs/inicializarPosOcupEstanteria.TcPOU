@@ -23,11 +23,9 @@ FOR fila := 1 TO 6 DO
 END_FOR]]></ST>
     </Implementation>
     <LineIds Name="inicializarPosOcupEstanteria">
-      <LineId Id="26" Count="1" />
-      <LineId Id="15" Count="2" />
-      <LineId Id="20" Count="0" />
-      <LineId Id="23" Count="0" />
+      <LineId Id="38" Count="5" />
       <LineId Id="9" Count="0" />
+      <LineId Id="44" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>
