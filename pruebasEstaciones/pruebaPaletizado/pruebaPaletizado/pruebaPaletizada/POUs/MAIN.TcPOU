@@ -69,6 +69,7 @@ VAR
 	timerSubidaPalet: TON;
 	flancoBasePalet : R_trig;
 	saliendo: BOOL;
+	numProductosCompletos: INT;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -182,7 +183,7 @@ IF enclaveStart AND NOT emergencia THEN
 	END_IF
 
 	// Si se dispone de una columna (2 elementos) se empuja hacia el plato
-	IF contadorVector = 2 AND paletListo THEN
+	IF contadorVector >= 2 AND paletListo THEN
 		startTimerVector := TRUE;
 		
 	END_IF
@@ -316,6 +317,8 @@ IF enclaveStart AND NOT emergencia THEN
 			paletListo := FALSE;
 			openPlate := FALSE;
 			saliendo := TRUE;
+			numProductosCompletos := numProductosCompletos + 1;
+			
 		END_IF	
 END_IF
 // --------------------------- Actualizar salidas ---------------------------
@@ -351,6 +354,7 @@ GVLvars.OpenPlate := openPlate;
 GVLvars.elevatorUp := elevatorUp;
 GVLvars.elevatorDown := elevatorDown;
 GVLvars.elevatorToLimit := elevatorToLimit;
+GVLvars.numProductosCompletos := numProductosCompletos;
 
 
 
@@ -433,8 +437,12 @@ GVLvars.elevatorToLimit := elevatorToLimit;
       <LineId Id="2899" Count="3" />
       <LineId Id="2904" Count="0" />
       <LineId Id="2911" Count="0" />
+      <LineId Id="2987" Count="0" />
+      <LineId Id="2990" Count="0" />
       <LineId Id="2898" Count="0" />
-      <LineId Id="2607" Count="37" />
+      <LineId Id="2607" Count="33" />
+      <LineId Id="2989" Count="0" />
+      <LineId Id="2641" Count="3" />
       <LineId Id="32" Count="0" />
     </LineIds>
   </POU>

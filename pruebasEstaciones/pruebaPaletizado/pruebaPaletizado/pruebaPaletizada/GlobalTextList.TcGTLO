@@ -1,0 +1,259 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <GlobalTextList Name="GlobalTextList" Id="{2fa197de-0872-4604-a7b2-0e389166fb00}">
+    <XmlArchive>
+      <Data>
+        <o xml:space="preserve" t="GlobalTextListObject">
+          <l n="TextList" t="ArrayList" cet="TextListRow">
+            <o>
+              <v n="TextID">"658"</v>
+              <v n="TextDefault">" 90º"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"760"</v>
+              <v n="TextDefault">"%i"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"30"</v>
+              <v n="TextDefault">"Abrazadera Base"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"360"</v>
+              <v n="TextDefault">"Abrazadera Tapa"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"548"</v>
+              <v n="TextDefault">"Base "</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"898"</v>
+              <v n="TextDefault">"Base elevada"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"313"</v>
+              <v n="TextDefault">"Base Elevada"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"192"</v>
+              <v n="TextDefault">"Base en Inferior"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"436"</v>
+              <v n="TextDefault">"Cinta con Bases"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"679"</v>
+              <v n="TextDefault">"Cinta con las bases y posteriormente producto final"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"348"</v>
+              <v n="TextDefault">"Cinta con las tapas "</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"583"</v>
+              <v n="TextDefault">"Cinta con Tapas"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"713"</v>
+              <v n="TextDefault">"Cinta de Salida"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"444"</v>
+              <v n="TextDefault">"CONTROLES NUMÉRICOS"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"193"</v>
+              <v n="TextDefault">"Desplegando Brazo Z"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"736"</v>
+              <v n="TextDefault">"Desplegar Brazo X"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"5"</v>
+              <v n="TextDefault">"Empuje Plato"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"176"</v>
+              <v n="TextDefault">"en 90º"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"777"</v>
+              <v n="TextDefault">"Indicador de mesa giratoria orientada a 90º"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"953"</v>
+              <v n="TextDefault">"Indicador de mesa giratoria orinetada a 0ª (posicion de reposo)"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"894"</v>
+              <v n="TextDefault">"Indicador de un palet sobre la mesa giratoria"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"761"</v>
+              <v n="TextDefault">"Indicador numérico de los elementos que se encuentran sobre el plato del paletizador"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"359"</v>
+              <v n="TextDefault">"Mesa en 0º"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"512"</v>
+              <v n="TextDefault">"Mesa en 90º"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"134"</v>
+              <v n="TextDefault">"MESA GIRATORIA"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"368"</v>
+              <v n="TextDefault">"Nº  Elem en Plato"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"730"</v>
+              <v n="TextDefault">"Nº  productos finales"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"98"</v>
+              <v n="TextDefault">"Nº  Productos Finales"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"718"</v>
+              <v n="TextDefault">"Nº elem en Plato"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"135"</v>
+              <v n="TextDefault">"Número de material en plato"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"50"</v>
+              <v n="TextDefault">"Palet"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"459"</v>
+              <v n="TextDefault">"Palet en Base"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"194"</v>
+              <v n="TextDefault">"Palet en Mesa"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"981"</v>
+              <v n="TextDefault">"PALETIZADOR"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"804"</v>
+              <v n="TextDefault">"PARTE INFERIOR"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"388"</v>
+              <v n="TextDefault">"PARTE SUPERIOR"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"393"</v>
+              <v n="TextDefault">"Plato Abierto"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"97"</v>
+              <v n="TextDefault">"PRODUCTO FINAL"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"275"</v>
+              <v n="TextDefault">"Producto Listo "</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"389"</v>
+              <v n="TextDefault">"Reset"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"678"</v>
+              <v n="TextDefault">"S"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"857"</v>
+              <v n="TextDefault">"Seta"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"747"</v>
+              <v n="TextDefault">"Start"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"828"</v>
+              <v n="TextDefault">"Stop"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"394"</v>
+              <v n="TextDefault">"Sujeccion de Tapa (Ventosa)"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"426"</v>
+              <v n="TextDefault">"Sujección Plato"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"464"</v>
+              <v n="TextDefault">"Y DE ESTADÍSTICA "</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+          </l>
+          <l n="Languages" t="ArrayList" />
+          <v n="GuidInit">{0411eaad-0c4e-4600-9935-3c92b7a91518}</v>
+          <v n="GuidReInit">{4f90ddb9-dcd6-40a7-8d59-a001a59cd4c3}</v>
+          <v n="GuidExitX">{8a0501f2-1ea3-4700-bc56-06ad7c247ae5}</v>
+        </o>
+      </Data>
+      <TypeList>
+        <Type n="ArrayList">System.Collections.ArrayList</Type>
+        <Type n="GlobalTextListObject">{63784cbb-9ba0-45e6-9d69-babf3f040511}</Type>
+        <Type n="Guid">System.Guid</Type>
+        <Type n="String">System.String</Type>
+        <Type n="TextListRow">{53da1be7-ad25-47c3-b0e8-e26286dad2e0}</Type>
+      </TypeList>
+    </XmlArchive>
+  </GlobalTextList>
+</TcPlcObject>

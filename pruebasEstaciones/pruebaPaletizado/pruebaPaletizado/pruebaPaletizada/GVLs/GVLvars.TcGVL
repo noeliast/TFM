@@ -41,6 +41,9 @@ VAR_GLOBAL
 	sEntradaPaletEnEstacion : BOOL;
 	{attribute 'OPC.UA.DA' := '1'}
 	sBasePalet : BOOL ;
+	{attribute 'OPC.UA.DA' := '1'}
+	numProductosCompletos : INT;
+	
 	
 
 	// Cintas
@@ -65,9 +68,9 @@ VAR_GLOBAL
 	unload : BOOL;
 	// Input
 	{attribute 'OPC.UA.DA' := '1'}
-	frontLimit : BOOL;
+	frontLimit : BOOL; // Limite frontal de la mesa giratoria
 	{attribute 'OPC.UA.DA' := '1'}
-	backLimit : BOOL;
+	backLimit : BOOL; // Limite trasero de la mesa giratoria
 	{attribute 'OPC.UA.DA' := '1'}
 	minuminRotation : BOOL; // rotation limit 0
 	{attribute 'OPC.UA.DA' := '1'}
