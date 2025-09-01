@@ -1,0 +1,210 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <POU Name="MAIN" Id="{d8a699b1-12c0-4a48-a20e-915507da6ca9}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	
+	//falling_edge : F_TRIG;
+	// Realimentacion boton start
+	
+	
+	enclaveCinta1 : BOOL; 
+	arranqueCinta2: BOOL;
+
+	cintas : ARRAY[0..GVL_Outputs.numCintas] OF BOOL;
+	sensores: ARRAY[0..GVL_Inputs.numSensores] OF BOOL;
+
+	
+	fBajadaCinta0 : F_TRIG;// Flanco bajada para sensor final de la primera cinta
+	
+	fBajadaVision : F_TRIG;//Flanco de bajada en el sensor previo al de vision
+	flancoVision: BOOL;
+	
+	timerDetecColor : TON;  // Timer para espera en el sensor de vision 
+	
+	sorterOrientation : INT; // Orientacion del rodillo para descarte de color
+	
+	detecColor: BOOL; // Si relizo la deteccion de color
+	
+	//Variable para los rodillos de descarte de color
+	popUpLeft: BOOL;
+	popUpRight: BOOL;
+	popUp : BOOL;
+	
+	
+	//Senales luminosas cuadro
+	luzCuadroVerde : BOOL;
+	luzCuadroNaranja : BOOL;
+	luzCuadroRoja : BOOL;
+	i: INT;// Indice contador
+	
+END_VAR
+
+//VAR_INPUT
+	
+//END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+(*Si se acciona el boton de start 
+se arranca la cinta de emision*)
+
+//falling_edge := F_TRIG(CLK:= GVL_Inputs.sensorDifusoPreVision); // Detecta flanco descendente
+
+// Flanco de bajada para parar en el sensor de vision
+fBajadaVision(CLK:= GVL_Inputs.sensorDifusoPreVision);
+flancoVision := fBajadaVision.Q;
+
+	
+
+//Si se acciona start se arranca la cinta de emision de elementos (cinta 0)
+IF GVL_Inputs.bStart THEN
+	enclaveCinta1 := TRUE ; // Se mantiene la accion de start
+END_IF
+
+
+// Si se acciono start se arracanca la cinta 0 (emision de elementos)
+IF enclaveCinta1 THEN
+	
+	cintas[0] :=TRUE;
+	luzCuadroVerde := TRUE;
+	
+	// Arrancar segudanda cinta 
+	//si el sensor del final de la cinta 1 detecta elemento
+	IF GVL_Inputs.sensorDifuso1 THEN
+		//cintas[1] := TRUE;
+		arranqueCinta2 := TRUE;
+	END_IF
+	
+	// CON EL ENCLAVE ESTARIA CTE ENCENDIENDO Y APAGANDO !!!!!
+	//Se para la cinta 0 cuando el elemento salio de esta
+	fBajadaCinta0(CLK:= GVL_Inputs.sensorDifuso1);
+	IF fBajadaCinta0.Q THEN
+		cintas[0] := FALSE;
+	END_IF
+	
+END_IF
+
+
+
+
+// Se acciona la cinta 2 (filtro de color y forma)
+IF arranqueCinta2 THEN
+	
+	cintas[1] := TRUE;
+	
+//	fBajadaVision(CLK:= GVL_Inputs.sensorDifusoPreVision);
+//	flancoVision := fBajadaVision.Q;
+
+	//Si se detecto pieza se para y detecta caracteristicas
+	IF  flancoVision THEN
+		//cintas[0] := FALSE; // Se para la emision de elementos
+		cintas[1] := FALSE;
+		
+		detecColor := TRUE;
+		
+		//Se detiene 2 segundos para detectar caracteristica de objeto
+		timerDetecColor(IN := detecColor, PT := T#2S);
+ 
+		IF timerDetecColor.Q  THEN// Si pasaron los 2 segundos se comprueba los datos del sensor
+			CASE GVL_Inputs.sensorVision OF
+				 // materia prima azul y metalica (seguir)
+				1,7 : popUp := TRUE;
+					popUpLeft := FALSE;
+					popUpRight := FALSE;  
+	
+				// materia prima verde (salida derecha)
+				4 :  popUp := TRUE;
+					popUpLeft := FALSE;
+					popUpRight := TRUE;   
+	 
+				//3: sorterOrientation := 0; // Outros
+				
+			END_CASE
+		END_IF
+	END_IF
+	
+	
+	
+	//Si se detecto elemento y analizo se reanuda la cinta
+	IF detecColor  AND timerDetecColor.Q THEN
+		//cintas[0] := TRUE;
+		cintas[1] := TRUE;
+		detecColor :=FALSE;
+		
+	END_IF
+	
+END_IF	
+
+
+
+
+// Si se acciona STOP paran todas las cintas y estaciones
+IF  NOT GVL_Inputs.bStop THEN
+	
+	//Se paran todas las cintas
+	FOR i := 0 TO GVL_Outputs.numCintas DO
+		cintas[i] := FALSE;
+	END_FOR
+//	cintas[0] := FALSE;
+//	cintas[1] := FALSE;
+	enclaveCinta1 := FALSE;
+	arranqueCinta2 := FALSE;
+	
+	luzCuadroVerde := FALSE;
+	luzCuadroNaranja := FALSE;
+	luzCuadroRoja := TRUE;
+	
+	// Se paran las estaciones (paletizado, montaje final etc)
+	
+END_IF
+
+
+//Actualizar salidas
+GVL_Outputs.cinta1 := cintas[0];
+GVL_Outputs.cinta2 := cintas[1];
+GVL_Outputs.cinta3 := cintas[2];
+GVL_Outputs.cintaSalidaColor := cintas[3];
+GVL_Outputs.popUp := popUp;
+GVL_Outputs.popUpLeft := popUpLeft;
+GVL_Outputs.popUpRight :=popUpRight;
+GVL_Outputs.luzVerdeCuadro := luzCuadroVerde;
+GVL_Outputs.luzAmarillaCuadro := luzCuadroNaranja;
+GVL_Outputs.luzRojaCuadro := luzCuadroRoja;
+
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN">
+      <LineId Id="1010" Count="0" />
+      <LineId Id="815" Count="1" />
+      <LineId Id="940" Count="0" />
+      <LineId Id="817" Count="9" />
+      <LineId Id="828" Count="0" />
+      <LineId Id="830" Count="4" />
+      <LineId Id="955" Count="0" />
+      <LineId Id="836" Count="0" />
+      <LineId Id="962" Count="0" />
+      <LineId Id="837" Count="15" />
+      <LineId Id="949" Count="2" />
+      <LineId Id="853" Count="5" />
+      <LineId Id="943" Count="1" />
+      <LineId Id="942" Count="0" />
+      <LineId Id="859" Count="1" />
+      <LineId Id="945" Count="0" />
+      <LineId Id="861" Count="5" />
+      <LineId Id="948" Count="0" />
+      <LineId Id="867" Count="14" />
+      <LineId Id="883" Count="0" />
+      <LineId Id="885" Count="0" />
+      <LineId Id="952" Count="1" />
+      <LineId Id="886" Count="2" />
+      <LineId Id="954" Count="0" />
+      <LineId Id="889" Count="20" />
+      <LineId Id="963" Count="3" />
+      <LineId Id="910" Count="14" />
+      <LineId Id="967" Count="1" />
+      <LineId Id="925" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

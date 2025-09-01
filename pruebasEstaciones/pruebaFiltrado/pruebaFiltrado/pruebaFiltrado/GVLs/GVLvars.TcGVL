@@ -25,6 +25,10 @@ VAR_GLOBAL
 	luzBotonStart : BOOL; // luz integrada en boton de start
 	{attribute 'OPC.UA.DA' := '1'}
 	luzBotonReset : BOOL; // luz integrada en boton de reset
+	{attribute 'OPC.UA.DA' := '1'}
+	modoManual : BOOL; // Estado 0 del selector
+	{attribute 'OPC.UA.DA' := '1'}
+	modoAuto : BOOL; // Estado 1  del selector
 	
 	
 	
@@ -65,6 +69,10 @@ VAR_GLOBAL
  	sCilindroBascula : BOOL;
 	{attribute 'OPC.UA.DA' := '1'}
 	sVision : DINT;
+	{attribute 'OPC.UA.DA' := '1'}
+	sRemoveFinal : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	sSalidaCintaVision : BOOL;
 	
 	
 	

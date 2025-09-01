@@ -29,10 +29,16 @@ VAR
 	luzReset: BOOL;
 	emergencia: BOOL;
 	ProductoFinal: BOOL;
+	modoManual: BOOL;
+	modoAuto: BOOL;
+	flancoPostSellado: F_TRIG;
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[luzStop := FALSE;
+      <ST><![CDATA[
+//------------------------------------------- Logica Botones -------------------------------------------
+
+luzStop := FALSE;
 luzStart := FALSE;
 luzReset := FALSE;
 
@@ -83,11 +89,23 @@ IF  GVLvars.seta AND emergencia THEN
 	END_IF
 END_IF
 
+IF GVLvars.modoManual THEN 
+	modoManual := TRUE;
+	modoAuto := FALSE;
+END_IF
+
+IF GVLvars.modoAuto THEN
+	modoManual := FALSE;
+	modoAuto := TRUE;
+END_IF
+
+
+//------------------------------------------- Logica Pick and Place -------------------------------------------
 IF sistemaActivo AND emergencia = FALSE THEN
 	
 	IF baseOK = FALSE AND tapaOK = FALSE THEN
 		cintaBase := TRUE;
-	cintaTapa := TRUE;
+		cintaTapa := TRUE;
 	END_IF
 	
 	flancoTapa(CLK:=GVLvars.sensorFotoTapa);
@@ -108,21 +126,17 @@ IF sistemaActivo AND emergencia = FALSE THEN
 		GVLvars.cerrarAbrazaderaTapa := TRUE;
 	END_IF
 	
-//	// --- Detección de flancos ---
-//	flancoBajada_MovingXY := (NOT GVL_Var.PickPlace_MovingXY) AND movingXY_Anterior;
-//	flancoBajada_MovingZ := (NOT GVL_Var.PickPlace_MovingZ) AND movingZ_Anterior;
-	
-//	movingXY_Anterior := GVL_Var.PickPlace_MovingXY;
-//	movingZ_Anterior := GVL_Var.PickPlace_MovingZ;
 	
 	// --- Maquina de estados Pick & Place ---
 	CASE EstadoPickPlace OF
 	
 		0: 
-			
+//			cintaTapa := TRUE;
+//			cintaBase := TRUE;
 			// Inicio - piezas posicionadas y abrazaderas cerradas
 			IF baseOK AND tapaOK AND GVLvars.limiteSujeccionBase AND GVLvars.limiteSujeccionTapa THEN
 				EstadoPickPlace := 1;
+				
 			END_IF
 	
 		1: // Desplagar horizontalmente
@@ -251,25 +265,35 @@ IF sistemaActivo AND emergencia = FALSE THEN
 		// e arranque de cintas
 		9:
 			GVLvars.levantarAbrazaderaTapa := TRUE;
-			cintaBase := TRUE;
+			cintaBase := FALSE;
 			cintaTapa := TRUE;
-			ProductoFinal := TRUE;
+			//ProductoFinal := TRUE;
+			
+			flancoPostSellado(CLK:=GVLvars.sensorPostSellado);
 			
 			//Si lla paso la barrera posicionadora
-			IF GVLvars.sensorPostSellado THEN
+			IF flancoPostSellado.Q THEN
 				GVLvars.levantarAbrazaderaTapa := FALSE;
 				baseOK := FALSE;
 				tapaOK := FALSE;
-	
+				cintaBase := FALSE;
+				cintaTapa := FALSE;
 				GVLvars.cerrarAbrazaderaBase := FALSE;
 				GVLvars.cerrarAbrazaderaTapa := FALSE;
-	
+				IF modoManual THEN
+					sistemaActivo := FALSE;
+				END_IF
 				EstadoPickPlace := 0;
 			END_IF
 	
 	ELSE
 		EstadoPickPlace := 0; // Si estado inválido, reiniciar
-	END_CASE	
+	END_CASE
+	
+	
+ELSE
+	cintaTapa := FALSE;
+	cintaBase := FALSE;	
 END_IF
 
 // Se actualizan las salias
@@ -291,6 +315,7 @@ GVLvars.luzReset := luzReset;
 ]]></ST>
     </Implementation>
     <LineIds Name="MAIN">
+      <LineId Id="1036" Count="2" />
       <LineId Id="962" Count="1" />
       <LineId Id="960" Count="1" />
       <LineId Id="715" Count="2" />
@@ -302,16 +327,47 @@ GVLvars.luzReset := luzReset;
       <LineId Id="756" Count="4" />
       <LineId Id="959" Count="0" />
       <LineId Id="965" Count="0" />
-      <LineId Id="761" Count="3" />
+      <LineId Id="761" Count="1" />
+      <LineId Id="1046" Count="0" />
+      <LineId Id="1039" Count="0" />
+      <LineId Id="1047" Count="0" />
+      <LineId Id="1049" Count="0" />
+      <LineId Id="1048" Count="0" />
+      <LineId Id="1053" Count="0" />
+      <LineId Id="1042" Count="0" />
+      <LineId Id="1044" Count="0" />
+      <LineId Id="1054" Count="0" />
+      <LineId Id="1045" Count="0" />
+      <LineId Id="1043" Count="0" />
+      <LineId Id="1040" Count="0" />
+      <LineId Id="763" Count="1" />
       <LineId Id="1001" Count="2" />
       <LineId Id="1005" Count="0" />
       <LineId Id="1004" Count="0" />
       <LineId Id="1006" Count="0" />
-      <LineId Id="765" Count="28" />
-      <LineId Id="998" Count="1" />
-      <LineId Id="794" Count="131" />
+      <LineId Id="765" Count="16" />
+      <LineId Id="789" Count="0" />
+      <LineId Id="1041" Count="0" />
+      <LineId Id="790" Count="3" />
+      <LineId Id="998" Count="0" />
+      <LineId Id="1066" Count="0" />
+      <LineId Id="999" Count="0" />
+      <LineId Id="794" Count="1" />
+      <LineId Id="1067" Count="0" />
+      <LineId Id="796" Count="128" />
+      <LineId Id="1065" Count="0" />
       <LineId Id="995" Count="1" />
-      <LineId Id="926" Count="32" />
+      <LineId Id="1068" Count="0" />
+      <LineId Id="1071" Count="0" />
+      <LineId Id="926" Count="5" />
+      <LineId Id="1064" Count="0" />
+      <LineId Id="932" Count="2" />
+      <LineId Id="1061" Count="1" />
+      <LineId Id="935" Count="5" />
+      <LineId Id="1058" Count="0" />
+      <LineId Id="1060" Count="0" />
+      <LineId Id="1055" Count="2" />
+      <LineId Id="941" Count="17" />
       <LineId Id="410" Count="0" />
     </LineIds>
   </POU>

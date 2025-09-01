@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <POU Name="Tanque" Id="{275e80ce-beff-4c0a-aa36-8b287ee0e914}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION Tanque : bool
+VAR_INPUT
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//Si tengo piez delante
+// bajo nivel de tanque (apertura de valvula) durante X segundos
+// Paro y devuelvo true (listo para continuar)
+
+(*COMPROBACIONES 
+ 	* Que haya siempre fluido en el tanque
+	* Tener pieza delante
+*)]]></ST>
+    </Implementation>
+    <LineIds Name="Tanque">
+      <LineId Id="7" Count="0" />
+      <LineId Id="13" Count="1" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="18" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

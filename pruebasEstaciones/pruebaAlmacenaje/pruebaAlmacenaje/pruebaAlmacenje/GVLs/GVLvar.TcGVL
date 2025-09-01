@@ -26,11 +26,14 @@ VAR_GLOBAL
 	{attribute 'OPC.UA.DA' := '1'}
 	luzBotonReset : BOOL;
 	{attribute 'OPC.UA.DA' := '1'}
+	modoManual : BOOL;
+	{attribute 'OPC.UA.DA' := '1'}
+	modoAuto : BOOL;
 	
 	
 
 	// Estanterias
-	estanteria: ARRAY[1..6,1..3] OF ARRAY[1..2] OF REAL;
+	estanteria: ARRAY[1..6,1..6] OF ARRAY[1..2] OF REAL;
 	baldasOcupadas : ARRAY [1..6,1..3] OF BOOL;
 	
 	// Cintas

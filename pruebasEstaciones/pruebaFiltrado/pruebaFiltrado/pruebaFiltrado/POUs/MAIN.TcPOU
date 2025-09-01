@@ -43,6 +43,12 @@ VAR
 	azul: BOOL;
 	metal: BOOL;
 	verde: BOOL;
+	modoManual: BOOL;
+	modoAuto : bool;
+	renudar: BOOL := TRUE;
+	flancoSalidaVision : F_TRIG;
+	flancoAscendenteVision : R_TRIG;
+	flancoSensorFinal: F_TRIG;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -84,10 +90,8 @@ luzReset := FALSE;
 IF GVLvars.botonStart AND NOT emergencia THEN
 	enclaveStart := TRUE;
 	cintaVision := TRUE;
-	//cintaRemoveVision := TRUE;
-	cintaBascula := TRUE;
-	cintaPostBascula := TRUE;
-	//cintaRemoveBascula 	:= TRUE;
+	//cintaBascula := TRUE;
+	//cintaPostBascula := TRUE;
 	luzStart := TRUE; 
 	luzVerde := TRUE;
 	luzAmarilla := FALSE;
@@ -146,20 +150,31 @@ IF GVLvars.setaEmergencia AND emergencia THEN
 	END_IF
 END_IF
 
+IF GVLvars.modoManual THEN
+	modoManual := TRUE;
+	modoAuto := FALSE;
+END_IF
+
+IF GVLvars.modoAuto THEN
+	modoManual := FALSE;
+	modoAuto := TRUE;
+END_IF
+
 
 // ------------------- PASO 2 - Filtro Vision -------------------
-IF enclaveStart AND NOT emergencia THEN
+IF enclaveStart AND NOT emergencia  THEN
 	
+	
+	flancoAscendenteVision(CLK:=GVLvars.sDifusoVision);
 	// Detectar flanco ascendente solo una vez por detección
-	IF GVLvars.sDifusoVision AND NOT difusoVisionAnt THEN
+	//IF GVLvars.sDifusoVision AND NOT difusoVisionAnt THEN
+	IF flancoAscendenteVision.Q THEN
 		startTimerVision := TRUE;  // Arranca el temporizador solo una vez por evento
 		cintaVision := FALSE; // Se para la cinta
 	END_IF
 	difusoVisionAnt := GVLvars.sDifusoVision;
 		
-	//IF GVLvars.sDifusoVision THEN
-	//cintaVision := FALSE; // Se para la cinta
-	//startTimerVision := TRUE;
+	
 	timerVision(IN:=startTimerVision, PT:=T#2S);
 	IF timerVision.Q THEN
 		startTimerVision:=FALSE;
@@ -180,7 +195,6 @@ IF enclaveStart AND NOT emergencia THEN
 	// Si hay que descratar y se detecta objeto delante del cilindro
 	IF descarteXcolor AND GVLvars.sCilindroVision THEN
 		descartando := TRUE;
-		
 	END_IF
 	
 	flancAnteriorCilindroVision(CLK := GVLvars.sCilindroVision);
@@ -189,7 +203,6 @@ IF enclaveStart AND NOT emergencia THEN
 	// Si tenemos que descartar y el objeto para el sensor (se situa el objeto en frente del cilindro)
 	IF descartando = TRUE  AND  flancAnteriorCilindroVision.Q  THEN
 		objetoPosicionDescarteV:=TRUE;
-		
 	END_IF
 	
 	
@@ -198,14 +211,25 @@ IF enclaveStart AND NOT emergencia THEN
 		cilindroVision := TRUE;
 		cintaRemoveVision := TRUE;	
 	END_IF
+	
+	flancoSalidaVision(CLK:=GVLvars.sSalidaCintaVision);
+	//Si el material ya salio de la cintas de vision esta se para
+	IF GVLvars.sSalidaCintaVision THEN
+		cintaVision := FALSE;
+		cintaBascula := TRUE;
+	END_IF
 
 	// si e objeto ya esta en la cinta de descarte se reanuda con la de vision
 	IF flancoCintaDescarte.Q  THEN 
-		cintaVision := TRUE;
+		cintaVision := true;
 		cilindroVision := FALSE;	
 		descartando := FALSE;
 		cintaRemoveVision := FALSE;
 		objetoPosicionDescarteV := FALSE;
+		
+		IF modoManual THEN
+			enclaveStart := FALSE;
+		END_IF
 		
 	END_IF
 
@@ -213,9 +237,10 @@ IF enclaveStart AND NOT emergencia THEN
 	
 // ------------------ PASO 3 - Filtro peso -------------------
 
-	cintaBascula := TRUE;
+	
 	
 	IF GVLvars.sDifusoBascula THEN
+		cintaVision := FALSE;
 		startTimerBascula := TRUE;  // Igual que el timer de vision: arranca el temporizador solo una vez
 		cintaBascula := FALSE; // Se para la cinta
 	END_IF
@@ -227,6 +252,7 @@ IF enclaveStart AND NOT emergencia THEN
 		peso := GVLvars.pesoBascula;
 		// Si el peso es mayor de un umbral se descarta
 		cintaBascula := TRUE; // Reanuda la marcha
+		cintaPostBascula := TRUE;
 		sinComparar := TRUE;
 	END_IF
 	
@@ -252,27 +278,44 @@ IF enclaveStart AND NOT emergencia THEN
 	END_IF
 
 	IF objetoPosicionDescarteP THEN
+		cintaBascula := FALSE;
 		cintaPostBascula := FALSE;
 		cilindroBascula := TRUE;
 		cintaRemoveBascula := TRUE;
 		
 	END_IF
 
-
+	// Si el material no se descarto y llego al final de la cinta se para esta
+	flancoSensorFinal(CLK:= GVLvars.sRemoveFinal);
+	IF flancoSensorFinal.Q THEN
+		cintaPostBascula := FALSE;
+		cintaVision := TRUE;
+		IF modoManual THEN
+			enclaveStart := FALSE;			
+		END_IF
+		
+	END_IF
 
 	
-	// si el objeto ya está en la cinta de descarte, se reanuda la cinta bascula
-	//IF GVLvars.sCilindroBasculaDelantero THEN
+	// si el objeto ya esta en la cinta de descarte
 	IF flancoCintaDescarteBascula.Q THEN
-		cintaPostBascula := TRUE;
 		cilindroBascula := FALSE;
 		descratandoXpeso := FALSE;
 		descarteXpeso := FALSE;
 		cintaRemoveBascula := FALSE;
 		objetoPosicionDescarteP := FALSE;
+		cintaVision := TRUE;
+		IF modoManual THEN
+			enclaveStart := FALSE;			
+		END_IF
+		
 	END_IF
 
-
+ELSE
+	cintaVision := FALSE;
+	cintaBascula := FALSE;
+	cintaPostBascula := FALSE;
+	
 
 END_IF
 
@@ -304,93 +347,58 @@ GVLvars.luzBotonStart := luzStart;
 ]]></ST>
     </Implementation>
     <LineIds Name="MAIN">
-      <LineId Id="335" Count="3" />
-      <LineId Id="603" Count="0" />
-      <LineId Id="339" Count="24" />
-      <LineId Id="642" Count="2" />
-      <LineId Id="689" Count="0" />
-      <LineId Id="364" Count="7" />
-      <LineId Id="632" Count="1" />
-      <LineId Id="635" Count="0" />
-      <LineId Id="637" Count="0" />
-      <LineId Id="372" Count="0" />
-      <LineId Id="604" Count="9" />
-      <LineId Id="647" Count="2" />
-      <LineId Id="646" Count="0" />
-      <LineId Id="373" Count="0" />
-      <LineId Id="692" Count="3" />
-      <LineId Id="699" Count="10" />
-      <LineId Id="697" Count="0" />
-      <LineId Id="710" Count="0" />
-      <LineId Id="712" Count="0" />
-      <LineId Id="698" Count="0" />
-      <LineId Id="696" Count="0" />
-      <LineId Id="713" Count="2" />
-      <LineId Id="719" Count="0" />
-      <LineId Id="727" Count="4" />
-      <LineId Id="717" Count="0" />
-      <LineId Id="769" Count="4" />
-      <LineId Id="718" Count="0" />
-      <LineId Id="716" Count="0" />
-      <LineId Id="374" Count="0" />
-      <LineId Id="376" Count="1" />
-      <LineId Id="691" Count="0" />
-      <LineId Id="378" Count="20" />
-      <LineId Id="870" Count="1" />
-      <LineId Id="869" Count="0" />
-      <LineId Id="399" Count="11" />
-      <LineId Id="776" Count="0" />
-      <LineId Id="411" Count="1" />
-      <LineId Id="782" Count="0" />
-      <LineId Id="780" Count="0" />
-      <LineId Id="570" Count="0" />
-      <LineId Id="787" Count="1" />
-      <LineId Id="571" Count="0" />
-      <LineId Id="789" Count="1" />
-      <LineId Id="785" Count="1" />
-      <LineId Id="784" Count="0" />
-      <LineId Id="783" Count="0" />
-      <LineId Id="417" Count="3" />
-      <LineId Id="631" Count="0" />
-      <LineId Id="781" Count="0" />
-      <LineId Id="471" Count="0" />
-      <LineId Id="421" Count="1" />
-      <LineId Id="425" Count="2" />
-      <LineId Id="492" Count="6" />
-      <LineId Id="501" Count="6" />
-      <LineId Id="514" Count="0" />
-      <LineId Id="818" Count="0" />
-      <LineId Id="567" Count="0" />
-      <LineId Id="817" Count="0" />
-      <LineId Id="813" Count="1" />
-      <LineId Id="820" Count="0" />
-      <LineId Id="815" Count="1" />
-      <LineId Id="821" Count="0" />
-      <LineId Id="812" Count="0" />
-      <LineId Id="515" Count="10" />
-      <LineId Id="794" Count="0" />
-      <LineId Id="529" Count="0" />
-      <LineId Id="797" Count="0" />
-      <LineId Id="796" Count="0" />
-      <LineId Id="804" Count="2" />
-      <LineId Id="802" Count="1" />
-      <LineId Id="799" Count="2" />
-      <LineId Id="798" Count="0" />
-      <LineId Id="530" Count="1" />
-      <LineId Id="629" Count="0" />
-      <LineId Id="532" Count="2" />
-      <LineId Id="569" Count="0" />
-      <LineId Id="630" Count="0" />
-      <LineId Id="810" Count="0" />
-      <LineId Id="535" Count="1" />
-      <LineId Id="456" Count="0" />
-      <LineId Id="572" Count="1" />
-      <LineId Id="457" Count="13" />
-      <LineId Id="615" Count="2" />
-      <LineId Id="650" Count="0" />
-      <LineId Id="652" Count="2" />
-      <LineId Id="651" Count="0" />
-      <LineId Id="618" Count="3" />
+      <LineId Id="967" Count="103" />
+      <LineId Id="1228" Count="0" />
+      <LineId Id="1230" Count="0" />
+      <LineId Id="1229" Count="0" />
+      <LineId Id="1071" Count="4" />
+      <LineId Id="1232" Count="0" />
+      <LineId Id="1231" Count="0" />
+      <LineId Id="1076" Count="1" />
+      <LineId Id="1269" Count="0" />
+      <LineId Id="1078" Count="4" />
+      <LineId Id="1270" Count="0" />
+      <LineId Id="1086" Count="19" />
+      <LineId Id="1107" Count="7" />
+      <LineId Id="1116" Count="7" />
+      <LineId Id="1259" Count="0" />
+      <LineId Id="1265" Count="1" />
+      <LineId Id="1260" Count="1" />
+      <LineId Id="1267" Count="0" />
+      <LineId Id="1262" Count="0" />
+      <LineId Id="1124" Count="2" />
+      <LineId Id="1283" Count="0" />
+      <LineId Id="1128" Count="3" />
+      <LineId Id="1277" Count="0" />
+      <LineId Id="1237" Count="2" />
+      <LineId Id="1132" Count="9" />
+      <LineId Id="1240" Count="0" />
+      <LineId Id="1142" Count="10" />
+      <LineId Id="1252" Count="0" />
+      <LineId Id="1153" Count="24" />
+      <LineId Id="1276" Count="0" />
+      <LineId Id="1178" Count="4" />
+      <LineId Id="1255" Count="0" />
+      <LineId Id="1183" Count="0" />
+      <LineId Id="1271" Count="0" />
+      <LineId Id="1184" Count="0" />
+      <LineId Id="1253" Count="0" />
+      <LineId Id="1274" Count="0" />
+      <LineId Id="1257" Count="1" />
+      <LineId Id="1256" Count="0" />
+      <LineId Id="1273" Count="0" />
+      <LineId Id="1254" Count="0" />
+      <LineId Id="1185" Count="2" />
+      <LineId Id="1189" Count="0" />
+      <LineId Id="1248" Count="3" />
+      <LineId Id="1246" Count="0" />
+      <LineId Id="1275" Count="0" />
+      <LineId Id="1241" Count="2" />
+      <LineId Id="1195" Count="3" />
+      <LineId Id="1281" Count="1" />
+      <LineId Id="1278" Count="0" />
+      <LineId Id="1280" Count="0" />
+      <LineId Id="1199" Count="27" />
       <LineId Id="6" Count="0" />
     </LineIds>
   </POU>

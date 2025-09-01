@@ -43,6 +43,10 @@ VAR_GLOBAL
 	sBasePalet : BOOL ;
 	{attribute 'OPC.UA.DA' := '1'}
 	numProductosCompletos : INT;
+	{attribute 'OPC.UA.DA' := '1'}
+	modoManual : BOOL; // Estado 0 del selector
+	{attribute 'OPC.UA.DA' := '1'}
+	modoAuto : BOOL; // Estado 1 del selector
 	
 	
 

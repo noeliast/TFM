@@ -30,9 +30,13 @@ VAR_GLOBAL
 	// SENSORES
 	{attribute 'OPC.UA.DA' := '1'}   
 	Sensor_Tanque_Salida : BOOL;       // Sensor fotoeléctrico justo antes del tanque
-//	{attribute 'OPC.UA.DA' := '1'}    
-//	Sensor_Barril_Listo  : BOOL;       // Sensor que detecta barril en posición
-	//	 {attribute 'OPC.UA.DA' := '1'}    
+	{attribute 'OPC.UA.DA' := '1'}
+	modoManual : BOOL; // Estado 0 del selector
+	{attribute 'OPC.UA.DA' := '1'}
+	modoAuto : BOOL; // Estado 1 del selector
+	{attribute 'OPC.UA.DA' := '1'}
+	sensorSalida : bool;
+	
 	
 
 	// TANQUE

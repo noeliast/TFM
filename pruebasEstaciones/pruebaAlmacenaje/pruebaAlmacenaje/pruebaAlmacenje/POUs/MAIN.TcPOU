@@ -46,6 +46,9 @@ VAR
 	filaEstanteria: INT;
 	colEstanteria: INT;
 	moving: REAL;
+	modoManual: BOOL;
+	modoAuto: BOOL;
+	primeraEjecucion: BOOL := true;
 END_VAR
 
 VAR PERSISTENT
@@ -59,21 +62,14 @@ luzStart := FALSE;
 luzStop := FALSE;
 luzReset:=FALSE;
 
-(*Boton start 
 
-
-
-*)
 IF GVLvar.botonStart AND NOT emergencia THEN
 	luzStart:= TRUE;
 	luzVerde := TRUE;
 	luzAmarilla := FALSE;
 	luzRoja := FALSE;
 	enclaveStart := TRUE;
-	cinta := TRUE;
-	cintaTransportadoraPalet := TRUE; 
-	distBaldas();
-	iniPosOcupEst();
+	//primeraEjecucion := TRUE;
 	setPointZ := 0.2;
 END_IF
 
@@ -112,6 +108,24 @@ IF  GVLvar.seta AND emergencia THEN
 	END_IF	
 END_IF
 
+
+IF GVLvar.modoManual THEN
+	modoManual := TRUE;
+	modoAuto := FALSE;
+END_IF
+
+IF GVLvar.modoAuto THEN
+	modoManual := FALSE;
+	modoAuto := TRUE;
+END_IF
+
+// Si es la primra vez que se arranca la planta
+IF primeraEjecucion THEN
+	distBaldas(); // Se establece las posicnoes de las baldas
+	iniPosOcupEst();// Se inicializan las posicones como libres
+	primeraEjecucion := FALSE;
+END_IF
+
 // ---------------------------------------------------------------------
 
 IF enclaveStart THEN
@@ -121,14 +135,8 @@ IF enclaveStart THEN
 	
 		// 1. Esperando Start
 		1: 
-//			IF GVLvar.botonStart THEN
-//				enclaveStart := TRUE;
-//				GVLvar.cinta := TRUE;
-//				distBaldas();
-//				iniPosOcupEst();
-//				GVLvar.setPointZ := 0.3;
-//				state := 2;  // pasar al siguiente estado
-//			END_IF
+			cinta := TRUE;
+			cintaTransportadoraPalet := TRUE; 
 			setPointZ := posInicialZ;
 			state := 2;  // pasar al siguiente estado
 			
@@ -228,7 +236,12 @@ IF enclaveStart THEN
 				elemDescargado := FALSE;
 				cinta := TRUE;
 				cintaTransportadoraPalet := TRUE; 
-				state := 2;
+				IF modoManual THEN
+					enclaveStart := FALSE;
+					cinta := FALSE;
+					cintaTransportadoraPalet := false; 
+				END_IF
+				state := 1;
 			END_IF
 	
 	//    // 8. Reanudar cinta y volver a esperar
@@ -270,7 +283,31 @@ GVLvar.cintaTransportadoraPalet := cintaTransportadoraPalet;
 ]]></ST>
     </Implementation>
     <LineIds Name="MAIN">
-      <LineId Id="633" Count="115" />
+      <LineId Id="633" Count="7" />
+      <LineId Id="645" Count="5" />
+      <LineId Id="982" Count="0" />
+      <LineId Id="655" Count="36" />
+      <LineId Id="960" Count="2" />
+      <LineId Id="964" Count="0" />
+      <LineId Id="971" Count="0" />
+      <LineId Id="965" Count="0" />
+      <LineId Id="963" Count="0" />
+      <LineId Id="692" Count="0" />
+      <LineId Id="967" Count="0" />
+      <LineId Id="969" Count="0" />
+      <LineId Id="968" Count="0" />
+      <LineId Id="990" Count="0" />
+      <LineId Id="985" Count="2" />
+      <LineId Id="989" Count="0" />
+      <LineId Id="995" Count="0" />
+      <LineId Id="988" Count="0" />
+      <LineId Id="984" Count="0" />
+      <LineId Id="693" Count="8" />
+      <LineId Id="709" Count="0" />
+      <LineId Id="975" Count="0" />
+      <LineId Id="710" Count="3" />
+      <LineId Id="978" Count="0" />
+      <LineId Id="715" Count="33" />
       <LineId Id="849" Count="0" />
       <LineId Id="841" Count="0" />
       <LineId Id="845" Count="1" />
@@ -284,7 +321,11 @@ GVLvar.cintaTransportadoraPalet := cintaTransportadoraPalet;
       <LineId Id="904" Count="0" />
       <LineId Id="909" Count="1" />
       <LineId Id="908" Count="0" />
-      <LineId Id="779" Count="61" />
+      <LineId Id="779" Count="22" />
+      <LineId Id="972" Count="1" />
+      <LineId Id="976" Count="1" />
+      <LineId Id="974" Count="0" />
+      <LineId Id="802" Count="38" />
       <LineId Id="565" Count="0" />
     </LineIds>
   </POU>

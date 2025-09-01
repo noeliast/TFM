@@ -51,6 +51,16 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"736"</v>
+              <v n="TextDefault">"Desplegar Brazo X"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"742"</v>
+              <v n="TextDefault">"Desplegar Brazo Z"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"646"</v>
               <v n="TextDefault">"Detección de objeto"</v>
               <l n="LanguageTexts" t="ArrayList" />

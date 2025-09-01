@@ -70,6 +70,8 @@ VAR
 	flancoBasePalet : R_trig;
 	saliendo: BOOL;
 	numProductosCompletos: INT;
+	modoManual: BOOL;
+	modoAuto : BOOL;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -103,9 +105,9 @@ IF GVLvars.botonStart AND NOT emergencia THEN
 	enclaveStart := TRUE;
 	//Arrancar cintas emisoras
 	cintaEntradaMaterial := TRUE;
-	cintaInclinadaMaterial := TRUE;
+	//cintaInclinadaMaterial := TRUE;
 	cintaEntradaPalets := TRUE;
-	cintaSalida := TRUE;
+	//cintaSalida := TRUE;
 	turnPaletizador := TRUE;
 	luzStart := TRUE;
 	luzVerde := TRUE;
@@ -166,17 +168,28 @@ IF GVLvars.seta AND emergencia THEN
 	END_IF
 END_IF
 
-	// Si se detecta objeto en la salida de la cinta se activa la inclinada
-//	IF  GVLvars.sDifusoCintaMaterial THEN
-//		 cintaInclinadaMaterial := TRUE;
-//	END_IF
+IF GVLvars.modoManual THEN
+	modoManual := TRUE;
+	modoAuto := FALSE;
+END_IF
 
+IF GVLvars.modoAuto THEN
+	modoManual := FALSE;
+	modoAuto := TRUE;
+END_IF
 
 // --------------------------- Material. Parte Superior ---------------------------
 IF enclaveStart AND NOT emergencia THEN
 	
+	// Si se llega a la segnda cinta (inclinada)
+	// se para la emisora y se arranca esa
+	IF GVLvars.sDifusoCintaMaterial  THEN
+		//cintaEntradaMaterial := FALSE;
+		cintaInclinadaMaterial := TRUE;
+	END_IF
+
+	// Si hay materiales ne la entrada del plato
 	flancoEntradaMaterial(CLK:=GVLvars.sEntradaPaletizadorMaterial);
-	
 	IF  flancoEntradaMaterial.Q THEN
 			beltPositive := TRUE;
 			contadorVector := contadorVector + 1;
@@ -187,8 +200,9 @@ IF enclaveStart AND NOT emergencia THEN
 		startTimerVector := TRUE;
 		
 	END_IF
-	timerVector(IN := startTimerVector, PT:=T#2S);
-		
+	
+	// Nos asegramos que estan los do elentos al final de lacinta del plato
+	timerVector(IN := startTimerVector, PT:=T#2S);	
 	IF timerVector.Q THEN
 		esperaPusher := TRUE;
 		startTimerVector := FALSE;
@@ -196,13 +210,11 @@ IF enclaveStart AND NOT emergencia THEN
 		cintaInclinadaMaterial := FALSE;
 	END_IF
 	
+	// Si se puede accionar el empuje
 	flancoPusher(CLK:=GVLvars.pusherLimit);
-	
 	IF esperaPusher THEN
 		beltPositive := FALSE;
-		pusher := TRUE;
-//		cintaEntradaMaterial := FALSE;
-//		cintaInclinadaMaterial := FALSE;
+		pusher := TRUE;	
 		
 		//Si el cilindro se extendio de todo (empujo completamente al plato)
 		IF flancoPusher.Q THEN
@@ -222,25 +234,28 @@ IF enclaveStart AND NOT emergencia THEN
 
 
 // --------------------------- Palets. Parte Inferior ---------------------------
-	flancoEntradaPalets(CLK:=GVLvars.sEntradaMesaRotation);
-	IF GVLvars.backLimit  THEN
+	
+	// Si llego un palet a la mesa orinetstiva se para
+	flancoEntradaPalets(CLK:= GVLvars.sEntradaMesaRotation);
+	IF flancoEntradaPalets.Q THEN
+		cintaEntradaPalets := FALSE;
+	END_IF
+	
+	IF GVLvars.sEntradaMesaRotation THEN
 		load := TRUE;
 		mesaCargada := TRUE;
-		
+		//cintaEntradaPalets := FALSE;
 		//turnMesaGiratoria := TRUE;
 	END_IF
 	
-	IF mesaCargada THEN
-		load:=TRUE;
-	END_IF
+//	IF mesaCargada THEN
+//		load:=TRUE;
+//	END_IF
 	
 	IF girandoMesa THEN 
 		turnMesaGiratoria := TRUE;
 	END_IF
-//	IF GVLvars.backLimit AND GVLvars.frontLimit THEN
-//		load := FA;
-		
-//	END_IF
+
 	
 	// Si llega a la parte frontal de la mesa y todavia no acabo de rotar se paara
 	IF GVLvars.frontLimit AND NOT GVLvars.maximunRotation THEN
@@ -256,12 +271,13 @@ IF enclaveStart AND NOT emergencia THEN
 	ELSIF NOT GVLvars.frontLimit AND GVLvars.maximunRotation AND GVLvars.sSalidaMesaRotacion THEN
 		turnMesaGiratoria := FALSE;
 		mesaCargada := FALSE;
+		load:= FALSE;
 		girandoMesa := FALSE;
 		//ScintaPaletEntradaEstacion := TRUE;
 	END_IF
 
-	flancoEntradaPalets(CLK:=GVLvars.sEntradaPaletEnEstacion);
 	
+	flancoEntradaPalets(CLK:=GVLvars.sEntradaPaletEnEstacion);
 	 IF  flancoEntradaPalets.Q THEN 
 		 chainPositive := TRUE;
 		 saliendo := FALSE;
@@ -293,8 +309,6 @@ IF enclaveStart AND NOT emergencia THEN
 			elevatorDown := TRUE; //  se activa la senal de bajada
 			paletizadoListo := TRUE;
 			openPlate := FALSE;
-			cintaEntradaMaterial := TRUE;
-			cintaInclinadaMaterial := TRUE;
 			MatrizElemLista := FALSE;
 			
 		END_IF
@@ -311,15 +325,30 @@ IF enclaveStart AND NOT emergencia THEN
 		
 	END_IF
 	
-	IF GVLvars.sPostPaletizado THEN
-			chainPositive := FALSE;	
-			paletizadoListo := FALSE;
-			paletListo := FALSE;
-			openPlate := FALSE;
-			saliendo := TRUE;
-			numProductosCompletos := numProductosCompletos + 1;
-			
-		END_IF	
+	flancoPostPaletizado(CLK:= GVLvars.sPostPaletizado);
+	
+	IF  flancoPostPaletizado.CLK THEN
+		chainPositive := FALSE;	
+		paletizadoListo := FALSE;
+		paletListo := FALSE;
+		openPlate := FALSE;
+		saliendo := TRUE;
+		cintaEntradaMaterial := TRUE;
+		cintaEntradaPalets := TRUE; 
+		numProductosCompletos := numProductosCompletos + 1;
+		IF modoManual THEN
+			enclaveStart := FALSE;
+		END_IF
+	END_IF	
+
+// Si el enclave no esta activo 
+ELSE
+	cintaEntradaMaterial := FALSE;
+	cintaInclinadaMaterial := FALSE;
+	cintaEntradaPalets := FALSE;
+	cintaPaletEntradaEstacion := FALSE;
+	cintaSalida := FALSE;
+	
 END_IF
 // --------------------------- Actualizar salidas ---------------------------
 
@@ -397,27 +426,54 @@ GVLvars.numProductosCompletos := numProductosCompletos;
       <LineId Id="2796" Count="0" />
       <LineId Id="2770" Count="0" />
       <LineId Id="2768" Count="0" />
-      <LineId Id="2459" Count="7" />
+      <LineId Id="3090" Count="2" />
+      <LineId Id="3094" Count="0" />
+      <LineId Id="3093" Count="0" />
+      <LineId Id="3085" Count="0" />
+      <LineId Id="2459" Count="0" />
+      <LineId Id="3086" Count="0" />
+      <LineId Id="3088" Count="0" />
+      <LineId Id="3087" Count="0" />
+      <LineId Id="2465" Count="1" />
       <LineId Id="2747" Count="0" />
       <LineId Id="2467" Count="0" />
-      <LineId Id="2645" Count="0" />
-      <LineId Id="2748" Count="0" />
-      <LineId Id="2646" Count="7" />
+      <LineId Id="3066" Count="1" />
+      <LineId Id="3062" Count="1" />
+      <LineId Id="3065" Count="0" />
+      <LineId Id="3064" Count="0" />
+      <LineId Id="3068" Count="0" />
+      <LineId Id="3061" Count="0" />
+      <LineId Id="2645" Count="8" />
       <LineId Id="2915" Count="0" />
-      <LineId Id="2654" Count="5" />
+      <LineId Id="2654" Count="0" />
+      <LineId Id="3069" Count="1" />
+      <LineId Id="2655" Count="0" />
+      <LineId Id="2657" Count="2" />
       <LineId Id="2916" Count="1" />
-      <LineId Id="2660" Count="21" />
-      <LineId Id="2531" Count="8" />
+      <LineId Id="2660" Count="1" />
+      <LineId Id="3071" Count="0" />
+      <LineId Id="2662" Count="0" />
+      <LineId Id="2664" Count="2" />
+      <LineId Id="3072" Count="0" />
+      <LineId Id="2670" Count="11" />
+      <LineId Id="2531" Count="5" />
+      <LineId Id="3073" Count="1" />
+      <LineId Id="3095" Count="4" />
+      <LineId Id="2538" Count="1" />
       <LineId Id="2805" Count="1" />
       <LineId Id="2540" Count="1" />
       <LineId Id="2808" Count="3" />
       <LineId Id="2816" Count="3" />
-      <LineId Id="2542" Count="8" />
+      <LineId Id="2545" Count="5" />
       <LineId Id="2813" Count="0" />
       <LineId Id="2551" Count="7" />
       <LineId Id="2812" Count="0" />
+      <LineId Id="3112" Count="0" />
       <LineId Id="2820" Count="0" />
-      <LineId Id="2559" Count="6" />
+      <LineId Id="2559" Count="1" />
+      <LineId Id="3078" Count="0" />
+      <LineId Id="2561" Count="1" />
+      <LineId Id="2564" Count="1" />
       <LineId Id="2913" Count="0" />
       <LineId Id="2566" Count="6" />
       <LineId Id="2905" Count="0" />
@@ -425,7 +481,7 @@ GVLvars.numProductosCompletos := numProductosCompletos;
       <LineId Id="2892" Count="0" />
       <LineId Id="2574" Count="13" />
       <LineId Id="2896" Count="0" />
-      <LineId Id="2588" Count="4" />
+      <LineId Id="2588" Count="2" />
       <LineId Id="2914" Count="0" />
       <LineId Id="2894" Count="0" />
       <LineId Id="2593" Count="7" />
@@ -434,12 +490,19 @@ GVLvars.numProductosCompletos := numProductosCompletos;
       <LineId Id="2906" Count="0" />
       <LineId Id="2606" Count="0" />
       <LineId Id="2897" Count="0" />
+      <LineId Id="3110" Count="1" />
       <LineId Id="2899" Count="3" />
       <LineId Id="2904" Count="0" />
       <LineId Id="2911" Count="0" />
+      <LineId Id="3079" Count="1" />
       <LineId Id="2987" Count="0" />
-      <LineId Id="2990" Count="0" />
+      <LineId Id="3081" Count="2" />
       <LineId Id="2898" Count="0" />
+      <LineId Id="3109" Count="0" />
+      <LineId Id="3102" Count="0" />
+      <LineId Id="3101" Count="0" />
+      <LineId Id="3104" Count="4" />
+      <LineId Id="3100" Count="0" />
       <LineId Id="2607" Count="33" />
       <LineId Id="2989" Count="0" />
       <LineId Id="2641" Count="3" />

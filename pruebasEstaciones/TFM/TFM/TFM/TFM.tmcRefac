@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Refactors>
+  <Renames>
+    <RenamedType>
+      <Type guid="275e80ce-beff-4c0a-aa36-8b287ee0e914">POU</Type>
+      <From>POU</From>
+      <To>Tanque</To>
+    </RenamedType>
+  </Renames>
+</Refactors>
