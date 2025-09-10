@@ -3,155 +3,135 @@
   <POU Name="MAIN" Id="{801920e0-6ca6-4611-bcca-80d44a3fd171}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM MAIN
 VAR
-	enclaveStart: BOOL;
-	cintaEntradaMaterial: BOOL;
-	cintaInclinadaMaterial: BOOL;
-	cintaEntradaPalets: BOOL;
-	cintaSalida: BOOL;
-	turnPaletizador: BOOL;
-	luzVerde: BOOL;
-	luzAmarilla : bool;
-	luzRoja: BOOL;
-	emergencia : bool;
-	turnMesaGiratoria: BOOL;
-	load: BOOL;
-	unload: BOOL;
-	pusher: BOOL;
-	turnFlipper: BOOL;
-	moveClamper: BOOL;
-	beltPositive: BOOL;
-	beltNegative: BOOL;
-	chainPositive: BOOL;
-	chainNegative: BOOL;
-	openPlate: BOOL;
-	elevatorUp: BOOL;
-	elevatorDown: BOOL;
-	elevatorToLimit: BOOL;
-	cintaPaletEntradaEstacion : BOOL;
-	contadorVector: INT;
-	MatrizElemLista: BOOL;
-	PaletListo: bool;
-	timerOpenPlate: TON;
-	paletizadoListo : bool;
-	girando: BOOL;
-	flancoEntradaPalets: F_TRIG;
-	flancoPusher : R_TRIG;
-	flancoPlato: R_TRIG;
-	flancoEntradaMaterial : F_TRIG;
-	contadorMatriz : int;
-	timerAbrirPusher: TOn;
-	startTimerPusher: BOOL;
-	esperaPusher: BOOL;
-	esperaPusher2: BOOL;
-	timerVector: ton;
-	startTimerVector: BOOL;
-	
-	recogerPusher: BOOL;
-	senalAnterior: INT;
-	senalActual: INT;
-	pusherLimitAnt: BOOL;
-	flancoPusherManual: BOOL;
-	clamp: BOOL;
-	flancoPlateManual: BOOL;
-	plateLimitAnt: BOOL;
-	bajandoPalet: BOOL;
-	flancoPostPaletizado: F_TRIG;
-	flancoMoving : F_TRIG;
-	flancoMoVING2 : f_trig;
-	paletArriba: BOOL;
-	luzStart: BOOL;
-	luzStop: BOOL;
-	luzReset: BOOL;
-	mesaCargada: BOOL;
-	girandoMesa: BOOL;
-	timerBajadaPalet: TON;
-	startTimerPalet: BOOL;
-	timerSubidaPalet: TON;
-	flancoBasePalet : R_trig;
-	saliendo: BOOL;
-	numProductosCompletos: INT;
-	modoManual: BOOL;
-	modoAuto : BOOL;
+    // --------------------------- Sistema principal ---------------------------
+    enclaveStart: BOOL;       // Indica si el sistema esta activo
+    emergencia: BOOL;         // Senal de emergencia activa
+
+    // --------------------------- Luces del cuadro ---------------------------
+    luzVerde: BOOL;           // Luz verde del sistema
+    luzAmarilla: BOOL;        // Luz amarilla del sistema
+    luzRoja: BOOL;            // Luz roja del sistema
+    luzStart: BOOL;           // Indicador de Start
+    luzStop: BOOL;            // Indicador de Stop
+    luzReset: BOOL;           // Indicador de Reset
+
+    // --------------------------- Cintas ---------------------------
+    cintaEntradaMaterial: BOOL;       // Cinta de entrada de material
+    cintaInclinadaMaterial: BOOL;     // Cinta inclinada de material
+    cintaEntradaPalets: BOOL;         // Cinta de entrada de palets
+    cintaSalida: BOOL;                // Cinta de salida de palet cargado
+    cintaPaletEntradaEstacion: BOOL;  // Cinta que lleva palet a la estacion
+
+    // --------------------------- Mesa giratoria ---------------------------
+    turnMesaGiratoria: BOOL;  // Giro de la mesa rotatoria
+    mesaCargada: BOOL;        // Indica si la mesa esta cargada
+    girandoMesa: BOOL;        // Indica si la mesa esta girando
+    load: BOOL;               // Senal de carga de palet en mesa
+    unload: BOOL;             // Senal de descarga de palet en mesa
+
+    // --------------------------- Paletizador ---------------------------
+    turnPaletizador: BOOL;    // Giro del paletizador
+    pusher: BOOL;             // Cilindro pusher
+    turnFlipper: BOOL;        // Giro del flipper (solo salida)
+    moveClamper: BOOL;        // Movimiento del clamp (solo salida)
+    beltPositive: BOOL;       // Movimiento positivo de cinta
+    beltNegative: BOOL;       // Movimiento negativo de cinta (solo salida)
+    chainPositive: BOOL;      // Movimiento positivo de cadena
+    chainNegative: BOOL;      // Movimiento negativo de cadena (solo salida)
+    openPlate: BOOL;          // Abrir plato
+    elevatorUp: BOOL;         // Subida de palet
+    elevatorDown: BOOL;       // Bajada de palet
+    elevatorToLimit: BOOL;    // Mover palet a limite
+    PaletListo: BOOL;         // Indica que palet esta listo
+    paletizadoListo: BOOL;    // Indica que palet ya esta cargado
+    bajandoPalet: BOOL;       // Indica bajada del palet
+    saliendo: BOOL;           // Indica salida del palet de la estacion
+    MatrizElemLista: BOOL;    // Indica que la matriz de elementos esta lista
+
+    // --------------------------- Sensores y flancos ---------------------------
+    flancoEntradaMaterial: F_TRIG;   // Flanco de entrada de material
+    flancoEntradaPalets: F_TRIG;     // Flanco de entrada de palets
+    flancoPusher: R_TRIG;            // Flanco del pusher
+    flancoPlato: R_TRIG;             // Flanco de plato abierto
+    flancoPostPaletizado: F_TRIG;    // Flanco de post paletizado
+    flancoBasePalet: R_TRIG;         // Flanco de base de palet
+
+    // --------------------------- Temporizadores ---------------------------
+    timerOpenPlate: TON;    // Temporizador de apertura del plato
+    timerVector: TON;       // Temporizador para control de vector
+    timerAbrirPusher: TON;  // Temporizador para pusher
+    timerBajadaPalet: TON;  // Temporizador para bajada del palet
+    timerSubidaPalet: TON;  // Temporizador para subida del palet
+
+    // --------------------------- Control interno ---------------------------
+    contadorVector: INT;        // Contador de elementos antes del pusher
+    startTimerVector: BOOL;     // Inicia temporizador de vector
+    esperaPusher: BOOL;         // Indica espera antes de activar pusher
+    recogerPusher: BOOL;        // Control de recogida con pusher
+    numProductosCompletos: INT; // Contador de productos completados
+    modoManual: BOOL;           // Modo manual
+    modoAuto: BOOL;             // Modo automatico
+	clamp : bool;
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[(*
-	1 - Boton de start (enclave + cintas emisoras + turn de paletizador)
-	
-	2 - Boton de stop
-	
-	3 - Palets
-		- detectar palet en mesa de rotacion
-		- girar mesa de rotacion (con flanco de bajada de sensor de entrada)
-		- arrancar mesa de rotacion y cinta de salida
-		- retornar mesa a posicion inicial (flanco sensor salida)
-		- colocar palet en base del paletizador
-	
-	4 - Objeto a paletizar
-		- arrancar cinta inclinada con flanco de sensor 
-		- activar pusher con 2 objetos (contador por sensor)
-		- cuando se hizo push 2 veces (4 objetos sobre plato) -> elevar paletizaodr
-		- paletizaodr elevado -> abrir plato con objetos
-		- bajar palet cargado 
-		- cerrar plato
-		- activar cinta para sacar palet cargado de la estacion
-
-*)
+      <ST><![CDATA[// Inicializacion de luces
 luzStart := FALSE;
 luzStop := FALSE;
 luzReset := FALSE;
 
+// --------------------------- Control Start ---------------------------
 IF GVLvars.botonStart AND NOT emergencia THEN
-	enclaveStart := TRUE;
-	//Arrancar cintas emisoras
-	cintaEntradaMaterial := TRUE;
-	//cintaInclinadaMaterial := TRUE;
-	cintaEntradaPalets := TRUE;
-	//cintaSalida := TRUE;
-	turnPaletizador := TRUE;
-	luzStart := TRUE;
-	luzVerde := TRUE;
-	luzAmarilla := FALSE;
-	luzRoja := FALSE;
+	enclaveStart := TRUE;                 // Activar el sistema
+	cintaEntradaMaterial := TRUE;         // Arranca cinta de material
+	cintaEntradaPalets := TRUE;           // Arranca cinta de palets
+	turnPaletizador := TRUE;              // Activa giro de paletizador
+	luzStart := TRUE;                     // Encender indicador Start
+	luzVerde := TRUE;                     // Luz verde encendida
+	luzAmarilla := FALSE;                 // Luz amarilla apagada
+	luzRoja := FALSE;                     // Luz roja apagada
 END_IF
 
+// --------------------------- Control Stop ---------------------------
 IF NOT GVLvars.botonStop AND NOT emergencia THEN
-	enclaveStart := FALSE;
-	luzStop := TRUE;
-	luzVerde := FALSE;
-	luzAmarilla := TRUE;
-	luzRoja := FALSE;
+	enclaveStart := FALSE;                // Desactivar sistema
+	luzStop := TRUE;                      // Encender luz Stop
+	luzVerde := FALSE;                    // Apagar luz verde
+	luzAmarilla := TRUE;                  // Encender luz amarilla
+	luzRoja := FALSE;                     // Luz roja apagada
 	cintaEntradaMaterial := FALSE;
 	cintaInclinadaMaterial := FALSE;
 	cintaEntradaPalets := FALSE;
 	cintaPaletEntradaEstacion := FALSE;
 	cintaSalida := FALSE;
 	turnPaletizador := FALSE;
-	turnMesaGiratoria := FALSE ;
-	load := FALSE ;
+	turnMesaGiratoria := FALSE;
+	load := FALSE;
 	unload := FALSE;
 END_IF
 
+// --------------------------- Emergencia ---------------------------
 IF NOT GVLvars.seta THEN
-	enclaveStart := FALSE;
+	enclaveStart := FALSE;                // Desactivar sistema
 	luzVerde := FALSE;
 	luzAmarilla := FALSE;
-	luzRoja := TRUE;
-	emergencia := TRUE; 
+	luzRoja := TRUE;                      // Luz roja encendida
+	emergencia := TRUE;                   // Activar estado emergencia
 	cintaEntradaMaterial := FALSE;
 	cintaInclinadaMaterial := FALSE;
 	cintaEntradaPalets := FALSE;
 	cintaPaletEntradaEstacion := FALSE;
 	cintaSalida := FALSE;
 	turnPaletizador := FALSE;
-	//turnMesaGiratoria := FALSE ;
-	load := FALSE ;
+	load := FALSE;
 	unload := FALSE;
 END_IF
 
+// --------------------------- Reset emergencia ---------------------------
 IF GVLvars.seta AND emergencia THEN
 	IF GVLvars.botonReset THEN
 		enclaveStart := TRUE;
+                 // Restablece sistema despues de emergencia
 		luzVerde := TRUE;
 		luzAmarilla := FALSE;
 		luzRoja := FALSE;
@@ -162,12 +142,10 @@ IF GVLvars.seta AND emergencia THEN
 		cintaPaletEntradaEstacion := TRUE;
 		cintaSalida := TRUE;
 		turnPaletizador := TRUE;
-//		turnMesaGiratoria := TRUE ;
-//		load := TRUE ;
-//		unload := TRUE;
 	END_IF
 END_IF
 
+// --------------------------- Modo manual / automatico ---------------------------
 IF GVLvars.modoManual THEN
 	modoManual := TRUE;
 	modoAuto := FALSE;
@@ -178,200 +156,158 @@ IF GVLvars.modoAuto THEN
 	modoAuto := TRUE;
 END_IF
 
-// --------------------------- Material. Parte Superior ---------------------------
+// --------------------------- Material - Parte Superior ---------------------------
 IF enclaveStart AND NOT emergencia THEN
-	
-	// Si se llega a la segnda cinta (inclinada)
-	// se para la emisora y se arranca esa
-	IF GVLvars.sDifusoCintaMaterial  THEN
-		//cintaEntradaMaterial := FALSE;
+	// Control de cinta inclinada
+	IF GVLvars.sDifusoCintaMaterial THEN
 		cintaInclinadaMaterial := TRUE;
 	END_IF
 
-	// Si hay materiales ne la entrada del plato
+	// Detecta llegada de material al plato
 	flancoEntradaMaterial(CLK:=GVLvars.sEntradaPaletizadorMaterial);
-	IF  flancoEntradaMaterial.Q THEN
-			beltPositive := TRUE;
-			contadorVector := contadorVector + 1;
+	IF flancoEntradaMaterial.Q THEN
+		beltPositive := TRUE;                // Arrancar cinta del paletizador
+		contadorVector := contadorVector + 1; // Incrementa contador de elementos
 	END_IF
 
-	// Si se dispone de una columna (2 elementos) se empuja hacia el plato
+	// Activar pusher cuando hay suficientes elementos
 	IF contadorVector >= 2 AND paletListo THEN
 		startTimerVector := TRUE;
-		
 	END_IF
-	
-	// Nos asegramos que estan los do elentos al final de lacinta del plato
-	timerVector(IN := startTimerVector, PT:=T#2S);	
+
+	// Temporizador para verificar posicion final de elementos
+	timerVector(IN := startTimerVector, PT:=T#2S);
 	IF timerVector.Q THEN
 		esperaPusher := TRUE;
 		startTimerVector := FALSE;
 		cintaEntradaMaterial := FALSE;
 		cintaInclinadaMaterial := FALSE;
 	END_IF
-	
-	// Si se puede accionar el empuje
+
+	// Accionamiento del pusher
 	flancoPusher(CLK:=GVLvars.pusherLimit);
 	IF esperaPusher THEN
 		beltPositive := FALSE;
-		pusher := TRUE;	
-		
-		//Si el cilindro se extendio de todo (empujo completamente al plato)
+		pusher := TRUE;
+
 		IF flancoPusher.Q THEN
-			//startTimerVector:=FALSE;
 			pusher := FALSE;
-			clamp := TRUE;
-			//beltPositive := TRUE;
+			clamp := TRUE;                  // Activar clamp
 			contadorVector := 0;
 			esperaPusher := FALSE;
-			MatrizElemLista := TRUE;
+			MatrizElemLista := TRUE;        // Elementos listos en la matriz
 		END_IF
 	END_IF
-	
-	
-	
+END_IF
 
-
-
-// --------------------------- Palets. Parte Inferior ---------------------------
-	
-	// Si llego un palet a la mesa orinetstiva se para
-	flancoEntradaPalets(CLK:= GVLvars.sEntradaMesaRotation);
+// --------------------------- Palets - Parte Inferior ---------------------------
+IF enclaveStart AND NOT emergencia THEN
+	flancoEntradaPalets(CLK:=GVLvars.sEntradaMesaRotation);
 	IF flancoEntradaPalets.Q THEN
 		cintaEntradaPalets := FALSE;
 	END_IF
-	
+
 	IF GVLvars.sEntradaMesaRotation THEN
-		load := TRUE;
-		mesaCargada := TRUE;
-		//cintaEntradaPalets := FALSE;
-		//turnMesaGiratoria := TRUE;
-	END_IF
-	
-//	IF mesaCargada THEN
-//		load:=TRUE;
-//	END_IF
-	
-	IF girandoMesa THEN 
-		turnMesaGiratoria := TRUE;
+		load := TRUE;          // Cargar palet en mesa
+		mesaCargada := TRUE;   // Marca que mesa esta cargada
 	END_IF
 
-	
-	// Si llega a la parte frontal de la mesa y todavia no acabo de rotar se paara
+	IF girandoMesa THEN 
+		turnMesaGiratoria := TRUE;    // Girar mesa
+	END_IF
+
+	// Control de rotacion de mesa
 	IF GVLvars.frontLimit AND NOT GVLvars.maximunRotation THEN
 		load := FALSE;
 		turnMesaGiratoria := TRUE;
 		girandoMesa := TRUE;
-	// Si esta en la parte frontal de la mesa y esta giro completamente
 	ELSIF GVLvars.frontLimit AND GVLvars.maximunRotation THEN
 		load := TRUE;
 		cintaPaletEntradaEstacion := TRUE;
-	// Si no hay nada en la parte frontal, mesa girada del todo y ya paso el palet
-	// se podrias comprobar solo con el sensor difuso
 	ELSIF NOT GVLvars.frontLimit AND GVLvars.maximunRotation AND GVLvars.sSalidaMesaRotacion THEN
 		turnMesaGiratoria := FALSE;
 		mesaCargada := FALSE;
-		load:= FALSE;
+		load := FALSE;
 		girandoMesa := FALSE;
-		//ScintaPaletEntradaEstacion := TRUE;
 	END_IF
 
-	
+	// Entrada de palet a estacion
 	flancoEntradaPalets(CLK:=GVLvars.sEntradaPaletEnEstacion);
-	 IF  flancoEntradaPalets.Q THEN 
-		 chainPositive := TRUE;
-		 saliendo := FALSE;
-	 END_IF
-	 
-	 IF GVLvars.elevatorFrontLimit AND PaletListo = FALSE and saliendo = false THEN
-		 chainPositive := FALSE;
-		 elevatorToLimit := TRUE;
-		 elevatorUp := TRUE;
-		 PaletListo := TRUE;
-		 elevatorDown := FALSE;
-		 openPlate := FALSE; // mieentras no este arriba el palet no se abre el plato
-		 
-	 END_IF
-	 
-	 
-	 
-	 flancoPlato(CLK:=GVLvars.plateLimit);
-	 
-	// Si el palet esta listo y los elementos agrupados
+	IF flancoEntradaPalets.Q THEN
+		chainPositive := TRUE;
+		saliendo := FALSE;
+	END_IF
+
+	// Subida de palet
+	IF GVLvars.elevatorFrontLimit AND PaletListo = FALSE AND saliendo = FALSE THEN
+		chainPositive := FALSE;
+		elevatorToLimit := TRUE;
+		elevatorUp := TRUE;
+		PaletListo := TRUE;
+		elevatorDown := FALSE;
+		openPlate := FALSE; // mientras no este arriba no abrir plato
+	END_IF
+
+	// Abrir plato cuando palet y materiales listos
+	flancoPlato(CLK:=GVLvars.plateLimit);
 	IF MatrizElemLista AND PaletListo THEN
-		openPlate := TRUE; // Se abre al plato con los materiales
-		//timerOpenPlate(IN:=openPlate, PT:= T#2S); // se espera a que este completamente abierto
-		// si las compuertas del plato estan completamente abiertas
+		openPlate := TRUE;
 		IF flancoPlato.Q THEN
-			elevatorToLimit := TRUE; // se desactiva la senal de subida del palet
-			elevatorUp := FALSE; 
-			//paletListo := FALSE;
-			elevatorDown := TRUE; //  se activa la senal de bajada
+			elevatorToLimit := TRUE;
+			elevatorUp := FALSE;
+			elevatorDown := TRUE;
 			paletizadoListo := TRUE;
 			openPlate := FALSE;
 			MatrizElemLista := FALSE;
-			
 		END_IF
 	END_IF
-	 flancoBasePalet(CLK:=GVLvars.sBasePalet);
-	//timerBajadaPalet(IN:=paletizadoListo, PT:=T#2S);
-	// Si el palet esta cargado con los materiales se dirige hacia el remover
+
+	// Bajada del palet
+	flancoBasePalet(CLK:=GVLvars.sBasePalet);
 	IF flancoBasePalet.Q THEN
 		chainPositive := TRUE;
 		cintaSalida := TRUE;
-		elevatorToLimit := FALSE; // se desactiva la senal de subida del palet
-		elevatorUp := FALSE; 
-		elevatorDown := FALSE; //  se activa la senal de bajada
-		
+		elevatorToLimit := FALSE;
+		elevatorUp := FALSE;
+		elevatorDown := FALSE;
 	END_IF
-	
-	flancoPostPaletizado(CLK:= GVLvars.sPostPaletizado);
-	
-	IF  flancoPostPaletizado.CLK THEN
-		chainPositive := FALSE;	
+
+	// Post paletizado
+	flancoPostPaletizado(CLK:=GVLvars.sPostPaletizado);
+	IF flancoPostPaletizado.CLK THEN
+		chainPositive := FALSE;
 		paletizadoListo := FALSE;
-		paletListo := FALSE;
+		PaletListo := FALSE;
 		openPlate := FALSE;
 		saliendo := TRUE;
 		cintaEntradaMaterial := TRUE;
-		cintaEntradaPalets := TRUE; 
+		cintaEntradaPalets := TRUE;
 		numProductosCompletos := numProductosCompletos + 1;
 		IF modoManual THEN
 			enclaveStart := FALSE;
 		END_IF
-	END_IF	
-
-// Si el enclave no esta activo 
+	END_IF
 ELSE
+	// Si el enclave no esta activo
 	cintaEntradaMaterial := FALSE;
 	cintaInclinadaMaterial := FALSE;
 	cintaEntradaPalets := FALSE;
 	cintaPaletEntradaEstacion := FALSE;
 	cintaSalida := FALSE;
-	
 END_IF
-// --------------------------- Actualizar salidas ---------------------------
 
-// Paletizador (salidas)
-// Cuadro (salidas)
+// --------------------------- Actualizar salidas ---------------------------
 GVLvars.luzVerde := luzVerde;
 GVLvars.luzRoja := luzRoja;
 GVLvars.luzAmarilla := luzAmarilla;
-
-// Cintas (salidas)
 GVLvars.cintaEntradaMaterial := cintaEntradaMaterial;
 GVLvars.cintaInclinadaMaterial := cintaInclinadaMaterial;
 GVLvars.cintaEntradaPalets := cintaEntradaPalets;
 GVLvars.cintaSalida := cintaSalida;
 GVLvars.cintaPaletEntradaEstacion := cintaPaletEntradaEstacion;
-
-// Mesa Giratoria (salidas)
 GVLvars.turnMesaGiratoria := turnMesaGiratoria;
-GVLvars.load :=  load;
+GVLvars.load := load;
 GVLvars.unload := unload;
-
-
-// Paletizador (salidas)
 GVLvars.pusher := pusher;
 GVLvars.turnFlipper := turnFlipper;
 GVLvars.moveClamper := moveClamper;
@@ -384,128 +320,10 @@ GVLvars.elevatorUp := elevatorUp;
 GVLvars.elevatorDown := elevatorDown;
 GVLvars.elevatorToLimit := elevatorToLimit;
 GVLvars.numProductosCompletos := numProductosCompletos;
-
-
-
-
 ]]></ST>
     </Implementation>
     <LineIds Name="MAIN">
-      <LineId Id="2420" Count="22" />
-      <LineId Id="2740" Count="0" />
-      <LineId Id="2742" Count="1" />
-      <LineId Id="2443" Count="8" />
-      <LineId Id="2752" Count="2" />
-      <LineId Id="2452" Count="3" />
-      <LineId Id="2751" Count="0" />
-      <LineId Id="2757" Count="1" />
-      <LineId Id="2755" Count="0" />
-      <LineId Id="2776" Count="2" />
-      <LineId Id="2780" Count="0" />
-      <LineId Id="2779" Count="0" />
-      <LineId Id="2775" Count="0" />
-      <LineId Id="2783" Count="0" />
-      <LineId Id="2785" Count="0" />
-      <LineId Id="2781" Count="0" />
-      <LineId Id="2456" Count="0" />
-      <LineId Id="2759" Count="0" />
-      <LineId Id="2749" Count="0" />
-      <LineId Id="2760" Count="0" />
-      <LineId Id="2763" Count="1" />
-      <LineId Id="2762" Count="0" />
-      <LineId Id="2765" Count="0" />
-      <LineId Id="2788" Count="7" />
-      <LineId Id="2787" Count="0" />
-      <LineId Id="2761" Count="0" />
-      <LineId Id="2750" Count="0" />
-      <LineId Id="2457" Count="0" />
-      <LineId Id="2767" Count="0" />
-      <LineId Id="2769" Count="0" />
-      <LineId Id="2771" Count="3" />
-      <LineId Id="2797" Count="7" />
-      <LineId Id="2796" Count="0" />
-      <LineId Id="2770" Count="0" />
-      <LineId Id="2768" Count="0" />
-      <LineId Id="3090" Count="2" />
-      <LineId Id="3094" Count="0" />
-      <LineId Id="3093" Count="0" />
-      <LineId Id="3085" Count="0" />
-      <LineId Id="2459" Count="0" />
-      <LineId Id="3086" Count="0" />
-      <LineId Id="3088" Count="0" />
-      <LineId Id="3087" Count="0" />
-      <LineId Id="2465" Count="1" />
-      <LineId Id="2747" Count="0" />
-      <LineId Id="2467" Count="0" />
-      <LineId Id="3066" Count="1" />
-      <LineId Id="3062" Count="1" />
-      <LineId Id="3065" Count="0" />
-      <LineId Id="3064" Count="0" />
-      <LineId Id="3068" Count="0" />
-      <LineId Id="3061" Count="0" />
-      <LineId Id="2645" Count="8" />
-      <LineId Id="2915" Count="0" />
-      <LineId Id="2654" Count="0" />
-      <LineId Id="3069" Count="1" />
-      <LineId Id="2655" Count="0" />
-      <LineId Id="2657" Count="2" />
-      <LineId Id="2916" Count="1" />
-      <LineId Id="2660" Count="1" />
-      <LineId Id="3071" Count="0" />
-      <LineId Id="2662" Count="0" />
-      <LineId Id="2664" Count="2" />
-      <LineId Id="3072" Count="0" />
-      <LineId Id="2670" Count="11" />
-      <LineId Id="2531" Count="5" />
-      <LineId Id="3073" Count="1" />
-      <LineId Id="3095" Count="4" />
-      <LineId Id="2538" Count="1" />
-      <LineId Id="2805" Count="1" />
-      <LineId Id="2540" Count="1" />
-      <LineId Id="2808" Count="3" />
-      <LineId Id="2816" Count="3" />
-      <LineId Id="2545" Count="5" />
-      <LineId Id="2813" Count="0" />
-      <LineId Id="2551" Count="7" />
-      <LineId Id="2812" Count="0" />
-      <LineId Id="3112" Count="0" />
-      <LineId Id="2820" Count="0" />
-      <LineId Id="2559" Count="1" />
-      <LineId Id="3078" Count="0" />
-      <LineId Id="2561" Count="1" />
-      <LineId Id="2564" Count="1" />
-      <LineId Id="2913" Count="0" />
-      <LineId Id="2566" Count="6" />
-      <LineId Id="2905" Count="0" />
-      <LineId Id="2903" Count="0" />
-      <LineId Id="2892" Count="0" />
-      <LineId Id="2574" Count="13" />
-      <LineId Id="2896" Count="0" />
-      <LineId Id="2588" Count="2" />
-      <LineId Id="2914" Count="0" />
-      <LineId Id="2894" Count="0" />
-      <LineId Id="2593" Count="7" />
-      <LineId Id="2908" Count="1" />
-      <LineId Id="2907" Count="0" />
-      <LineId Id="2906" Count="0" />
-      <LineId Id="2606" Count="0" />
-      <LineId Id="2897" Count="0" />
-      <LineId Id="3110" Count="1" />
-      <LineId Id="2899" Count="3" />
-      <LineId Id="2904" Count="0" />
-      <LineId Id="2911" Count="0" />
-      <LineId Id="3079" Count="1" />
-      <LineId Id="2987" Count="0" />
-      <LineId Id="3081" Count="2" />
-      <LineId Id="2898" Count="0" />
-      <LineId Id="3109" Count="0" />
-      <LineId Id="3102" Count="0" />
-      <LineId Id="3101" Count="0" />
-      <LineId Id="3104" Count="4" />
-      <LineId Id="3100" Count="0" />
-      <LineId Id="2607" Count="33" />
-      <LineId Id="2989" Count="0" />
-      <LineId Id="2641" Count="3" />
+      <LineId Id="3320" Count="244" />
       <LineId Id="32" Count="0" />
     </LineIds>
   </POU>
