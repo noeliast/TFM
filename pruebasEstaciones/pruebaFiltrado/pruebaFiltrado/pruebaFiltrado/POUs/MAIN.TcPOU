@@ -3,108 +3,88 @@
   <POU Name="MAIN" Id="{cbd6c4bf-6373-4be1-b0b1-5f6d9871d58c}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM MAIN
 VAR
-	enclaveStart: BOOL;
-	cintaRemoveVision: BOOL;
-	cintaBascula: BOOL;
-	cintaPostBascula: BOOL;
-	cintaRemoveBascula: BOOL;
-	cintaVision: BOOL;
-	timerVision: TON;
-	cintaBasculaPositivo:bool;
-	
-	descarteXcolor: BOOL;
-	cilindroVision: BOOL;
-	cintaDescarteVision: BOOL;
-	timerBascula: TON;
-	descarteXpeso: BOOL;
-	cilindroBascula: BOOL;
-	cintaDescarteBascula: BOOL;
-	startTimerVision: BOOL;
-	cintaBasculaNegativo: BOOL;
-	difusoVisionAnt: bool;
-	descartando: BOOL;
-	flancAnteriorCilindroVision : F_TRIG;
-	flancoCintaDescarte : F_TRIG;
-	descratandoXpeso: BOOL;
-	startTimerBascula: BOOL;
-	flancoCintaDescarteBascula: F_TRIG;
-	flancAnteriorCilindroBascula: F_TRIG;
-	luzStart: BOOL;
-	luzVerde: BOOL;
-	luzAmarilla: BOOL;
-	luzRoja: BOOL;
-	luzStop: BOOL;
-	luzReset: BOOL;
-	emergencia: BOOL;
-	objetoPosicionDescarteV: BOOL;
-	objetoPosicionDescarteP: BOOL;
-	peso: REAL;
-	sinComparar: BOOL := false;
-	azul: BOOL;
-	metal: BOOL;
-	verde: BOOL;
-	modoManual: BOOL;
-	modoAuto : bool;
-	renudar: BOOL := TRUE;
-	flancoSalidaVision : F_TRIG;
-	flancoAscendenteVision : R_TRIG;
-	flancoSensorFinal: F_TRIG;
+    // --------------------------- Sistema principal ---------------------------
+    enclaveStart: BOOL;       // Indica si el sistema esta activo
+    emergencia: BOOL;         // Señal de emergencia activa
+    renudar: BOOL := TRUE;    // Reanudar proceso si se interrumpe
+
+    // --------------------------- Luces del cuadro ---------------------------
+    luzStart: BOOL;           // Indicador de Start
+    luzStop: BOOL;            // Indicador de Stop
+    luzReset: BOOL;           // Indicador de Reset
+    luzVerde: BOOL;           // Luz verde del sistema
+    luzAmarilla: BOOL;        // Luz amarilla del sistema
+    luzRoja: BOOL;            // Luz roja del sistema
+
+    // --------------------------- Cintas ---------------------------
+    cintaVision: BOOL;             // Cinta de vision
+    cintaRemoveVision: BOOL;       // Cinta de remove de vision
+    cintaBascula: BOOL;            // Cinta de bascula
+    cintaPostBascula: BOOL;        // Cinta posterior a bascula
+    cintaRemoveBascula: BOOL;      // Cinta de remove de bascula
+    cintaBasculaPositivo: BOOL;    // Direccion positiva cinta bascula
+    cintaBasculaNegativo: BOOL;    // Direccion negativa cinta bascula
+
+    // --------------------------- Sensores y flancos ---------------------------
+    flancoAscendenteVision: R_TRIG;       // Flanco ascendente sensor vision
+    flancoSalidaVision: F_TRIG;           // Flanco de salida de la cinta de vision
+    flancoSensorFinal: F_TRIG;            // Flanco sensor final
+    flancAnteriorCilindroVision: F_TRIG;  // Flanco anterior cilindro vision
+    flancoCintaDescarte: F_TRIG;          // Flanco cinta de descarte
+    flancAnteriorCilindroBascula: F_TRIG; // Flanco anterior cilindro bascula
+    flancoCintaDescarteBascula: F_TRIG;   // Flanco cinta de descarte bascula
+
+    // --------------------------- Cilindros ---------------------------
+    cilindroVision: BOOL;       // Activacion cilindro vision
+    cilindroBascula: BOOL;      // Activacion cilindro bascula
+
+    // --------------------------- Temporizadores ---------------------------
+    timerVision: TON;           // Temporizador para vision
+    startTimerVision: BOOL;     // Inicio temporizador vision
+    timerBascula: TON;          // Temporizador para bascula
+    startTimerBascula: BOOL;    // Inicio temporizador bascula
+
+    // --------------------------- Variables de control ---------------------------
+    descarteXcolor: BOOL;        // Indica que se descarta por color
+    descartando: BOOL;           // Indica que se esta descartando por color
+    descratandoXpeso: BOOL;      // Indica que se esta descartando por peso
+    descarteXpeso: BOOL;          // Indica que se descarta por peso
+    objetoPosicionDescarteV: BOOL; // Objeto colocado para cilindro vision
+    objetoPosicionDescarteP: BOOL; // Objeto colocado para cilindro bascula
+    sinComparar: BOOL := FALSE;  // Indica que el peso aun no se comparo
+    peso: REAL;                  // Peso del objeto
+    azul: BOOL;                  // Color azul detectado
+    metal: BOOL;                 // Material metal detectado
+    verde: BOOL;                 // Color verde detectado
+
+    // --------------------------- Modo de operacion ---------------------------
+    modoManual: BOOL;            // Modo manual
+    modoAuto: BOOL;              // Modo automatico
+	difusoVisionAnt: BOOL;
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[(*
-
-1 - Si se pulsa strart -> enclave y arranque de cintas
-  -	** Si se pulsa stop -> parar toda la secuencia
-  
-2 - Si se detecta en el sensor fotoelectrico de vision
-	* Se para esa cinta 2 segundos
-	* Se cogen las caracteristicas del objeto
-		- Base azul : 3
-		- Base verde : 6
-		- Base metal : 9
-	* En caso de descarte 
-		- Se para cinta con el sensor delanterio del cilindro
-		- Se acciona el cilindro
-		- Se activa la cinta de descarte con el sensor fotoelectrico 
-		  ( el tiempo de activo se sabe por vel y distancia x.ej)
- 
-3 - Si se detecta objeto en la cinta de pesaje (sensor fotoelectrico)
-	* Se para la cinta 2 segundos
-	* Se cogen als caracteristicas del objeto
-		- Bases verde / azul : 7 kg
-		- Base metalica : 9 kg
-	* En caso de descarte
-		--- Repetir proceso anterior
-
-4 - Actualizar salidas
-
-*)
-
-// ------------------- PASO 1  Botones Cuadro -------------------
-
+      <ST><![CDATA[// ------------------- PASO 1 - Botones cuadro -------------------
 luzStart := FALSE;
 luzStop := FALSE;
-luzReset := FALSE; 
+luzReset := FALSE;
 
 IF GVLvars.botonStart AND NOT emergencia THEN
-	enclaveStart := TRUE;
-	cintaVision := TRUE;
-	//cintaBascula := TRUE;
-	//cintaPostBascula := TRUE;
+	enclaveStart := TRUE;        // Activar sistema
+	cintaVision := TRUE;         // Arranca cinta vision
 	luzStart := TRUE; 
-	luzVerde := TRUE;
-	luzAmarilla := FALSE;
-	luzRoja := FALSE;
+	luzVerde := TRUE;            // Luz verde encendida
+	luzAmarilla := FALSE;        // Luz amarilla apagada
+	luzRoja := FALSE;            // Luz roja apagada
 END_IF
 
 IF NOT GVLvars.botonStop AND NOT emergencia THEN
-	enclaveStart := FALSE;
+	enclaveStart := FALSE;        // Desactivar sistema
 	cintaVision := FALSE;
 	cintaRemoveVision := FALSE;
 	cintaBascula := FALSE;
 	cintaPostBascula := FALSE;
-	cintaRemoveBascula 	:= FALSE;
+	cintaRemoveBascula := FALSE;
 	cilindroVision := FALSE;
 	cilindroBascula := FALSE;
 	luzStop := TRUE; 
@@ -113,40 +93,36 @@ IF NOT GVLvars.botonStop AND NOT emergencia THEN
 	luzRoja := FALSE;
 END_IF
 
-
-
 IF NOT GVLvars.setaEmergencia THEN
-	enclaveStart := FALSE;
+	enclaveStart := FALSE;        // Desactivar sistema
 	cintaVision := FALSE;
 	cintaRemoveVision := FALSE;
 	cintaBascula := FALSE;
 	cintaPostBascula := FALSE;
-	cintaRemoveBascula 	:= FALSE;
+	cintaRemoveBascula := FALSE;
 	cilindroVision := FALSE;
 	cilindroBascula := FALSE;
-	luzStop := FALSE; 
+	luzStop := FALSE;
 	luzVerde := FALSE;
 	luzAmarilla := FALSE;
-	luzRoja := TRUE;
+	luzRoja := TRUE;             // Luz roja de emergencia
 	emergencia := TRUE;
-	//luzReset := TRUE;
 END_IF
-
 
 IF GVLvars.setaEmergencia AND emergencia THEN
 	IF GVLvars.botonReset THEN
-		enclaveStart := TRUE;
-		luzStop := FALSE; 
+		enclaveStart := TRUE;     // Reactivar sistema
+		luzStop := FALSE;
 		luzVerde := TRUE;
 		luzAmarilla := FALSE;
 		luzRoja := FALSE;
 		emergencia := FALSE;
-		luzReset := TRUE;
+		luzReset := TRUE;         // Indica reset realizado
 		cintaVision := TRUE;
 		cintaRemoveVision := TRUE;
 		cintaBascula := TRUE;
 		cintaPostBascula := TRUE;
-		cintaRemoveBascula 	:= TRUE;
+		cintaRemoveBascula := TRUE;
 	END_IF
 END_IF
 
@@ -160,121 +136,98 @@ IF GVLvars.modoAuto THEN
 	modoAuto := TRUE;
 END_IF
 
-
 // ------------------- PASO 2 - Filtro Vision -------------------
-IF enclaveStart AND NOT emergencia  THEN
-	
-	
+IF enclaveStart AND NOT emergencia THEN
 	flancoAscendenteVision(CLK:=GVLvars.sDifusoVision);
-	// Detectar flanco ascendente solo una vez por detección
-	//IF GVLvars.sDifusoVision AND NOT difusoVisionAnt THEN
 	IF flancoAscendenteVision.Q THEN
-		startTimerVision := TRUE;  // Arranca el temporizador solo una vez por evento
-		cintaVision := FALSE; // Se para la cinta
+		startTimerVision := TRUE;   // Arranca temporizador
+		cintaVision := FALSE;       // Para la cinta
 	END_IF
 	difusoVisionAnt := GVLvars.sDifusoVision;
-		
-	
+
 	timerVision(IN:=startTimerVision, PT:=T#2S);
 	IF timerVision.Q THEN
-		startTimerVision:=FALSE;
-		// Si es color azul o metalica continua 
+		startTimerVision := FALSE;
+		// Determina si se descarta por color
 		IF GVLvars.sVision = 3 OR GVLvars.sVision = 9 THEN
-			descarteXcolor := FALSE;
-		// Se descarta la base
+			descarteXcolor := FALSE;   // Azul o metal: no descartar
 		ELSE
-			descarteXcolor := TRUE;
+			descarteXcolor := TRUE;    // Otro color: descartar
 		END_IF
 		azul := GVLvars.sVision = 3;
 		metal := GVLvars.sVision = 9;
 		verde := GVLvars.sVision = 6;
-		cintaVision := TRUE; // Reanuda la marcha
-		
-	END_IF
-	
-	// Si hay que descratar y se detecta objeto delante del cilindro
-	IF descarteXcolor AND GVLvars.sCilindroVision THEN
-		descartando := TRUE;
-	END_IF
-	
-	flancAnteriorCilindroVision(CLK := GVLvars.sCilindroVision);
-	flancoCintaDescarte(CLK := GVLvars.sDifusoRemoveVision);
-	
-	// Si tenemos que descartar y el objeto para el sensor (se situa el objeto en frente del cilindro)
-	IF descartando = TRUE  AND  flancAnteriorCilindroVision.Q  THEN
-		objetoPosicionDescarteV:=TRUE;
-	END_IF
-	
-	
-	IF objetoPosicionDescarteV THEN	
-		cintaVision := FALSE;
-		cilindroVision := TRUE;
-		cintaRemoveVision := TRUE;	
-	END_IF
-	
-	flancoSalidaVision(CLK:=GVLvars.sSalidaCintaVision);
-	//Si el material ya salio de la cintas de vision esta se para
-	IF GVLvars.sSalidaCintaVision THEN
-		cintaVision := FALSE;
-		cintaBascula := TRUE;
+		cintaVision := TRUE;           // Reanuda cinta
 	END_IF
 
-	// si e objeto ya esta en la cinta de descarte se reanuda con la de vision
-	IF flancoCintaDescarte.Q  THEN 
-		cintaVision := true;
-		cilindroVision := FALSE;	
+	IF descarteXcolor AND GVLvars.sCilindroVision THEN
+		descartando := TRUE;           // Activar proceso de descarte vision
+	END_IF
+
+	flancAnteriorCilindroVision(CLK := GVLvars.sCilindroVision);
+	flancoCintaDescarte(CLK := GVLvars.sDifusoRemoveVision);
+
+	IF descartando AND flancAnteriorCilindroVision.Q THEN
+		objetoPosicionDescarteV := TRUE; // Objeto en posicion cilindro vision
+	END_IF
+
+	IF objetoPosicionDescarteV THEN
+		cintaVision := FALSE;
+		cilindroVision := TRUE;
+		cintaRemoveVision := TRUE;
+	END_IF
+
+	flancoSalidaVision(CLK:=GVLvars.sSalidaCintaVision);
+	IF GVLvars.sSalidaCintaVision THEN
+		cintaVision := FALSE;
+		cintaBascula := TRUE;          // Mueve objeto a bascula
+	END_IF
+
+	IF flancoCintaDescarte.Q THEN
+		cintaVision := TRUE;
+		cilindroVision := FALSE;
 		descartando := FALSE;
 		cintaRemoveVision := FALSE;
 		objetoPosicionDescarteV := FALSE;
-		
 		IF modoManual THEN
 			enclaveStart := FALSE;
 		END_IF
-		
 	END_IF
 
-	
-	
-// ------------------ PASO 3 - Filtro peso -------------------
-
-	
-	
+// ------------------- PASO 3 - Filtro peso -------------------
 	IF GVLvars.sDifusoBascula THEN
 		cintaVision := FALSE;
-		startTimerBascula := TRUE;  // Igual que el timer de vision: arranca el temporizador solo una vez
-		cintaBascula := FALSE; // Se para la cinta
+		startTimerBascula := TRUE; // Arranca temporizador bascula
+		cintaBascula := FALSE;
 	END_IF
-	
+
 	timerBascula(IN:=startTimerBascula, PT:=T#2S);
-	
+
 	IF timerBascula.Q AND sinComparar = FALSE THEN
 		startTimerBascula := FALSE;
 		peso := GVLvars.pesoBascula;
-		// Si el peso es mayor de un umbral se descarta
-		cintaBascula := TRUE; // Reanuda la marcha
+		cintaBascula := TRUE;
 		cintaPostBascula := TRUE;
 		sinComparar := TRUE;
 	END_IF
-	
-	IF  peso > 4 THEN
+
+	IF peso > 4 THEN
 		descarteXpeso := TRUE;
 		sinComparar := FALSE;
 	ELSE
 		descarteXpeso := FALSE;
 		sinComparar := FALSE;
 	END_IF
-		
-	// Si hay que descartar y se detecta objeto delante del cilindro
+
 	IF descarteXpeso AND GVLvars.sCilindroBascula THEN
 		descratandoXpeso := TRUE;
 	END_IF
-	
+
 	flancAnteriorCilindroBascula(CLK := GVLvars.sCilindroBascula);
-	flancoCintaDescarteBascula(CLK := GVLvars.sDifusoRemovePeso);
-	
-	// Si tenemos que descartar y el objeto para el sensor
-	IF descratandoXpeso = TRUE AND flancAnteriorCilindroBascula.Q THEN
-		objetoPosicionDescarteP:=TRUE;
+	flancoCintaDescarteBascula(CLK :=GVLvars.sDifusoRemovePeso);
+
+	IF descratandoXpeso AND flancAnteriorCilindroBascula.Q THEN
+		objetoPosicionDescarteP := TRUE;
 	END_IF
 
 	IF objetoPosicionDescarteP THEN
@@ -282,22 +235,17 @@ IF enclaveStart AND NOT emergencia  THEN
 		cintaPostBascula := FALSE;
 		cilindroBascula := TRUE;
 		cintaRemoveBascula := TRUE;
-		
 	END_IF
 
-	// Si el material no se descarto y llego al final de la cinta se para esta
-	flancoSensorFinal(CLK:= GVLvars.sRemoveFinal);
+	flancoSensorFinal(CLK:=GVLvars.sRemoveFinal);
 	IF flancoSensorFinal.Q THEN
 		cintaPostBascula := FALSE;
 		cintaVision := TRUE;
 		IF modoManual THEN
-			enclaveStart := FALSE;			
+			enclaveStart := FALSE;
 		END_IF
-		
 	END_IF
 
-	
-	// si el objeto ya esta en la cinta de descarte
 	IF flancoCintaDescarteBascula.Q THEN
 		cilindroBascula := FALSE;
 		descratandoXpeso := FALSE;
@@ -306,99 +254,33 @@ IF enclaveStart AND NOT emergencia  THEN
 		objetoPosicionDescarteP := FALSE;
 		cintaVision := TRUE;
 		IF modoManual THEN
-			enclaveStart := FALSE;			
+			enclaveStart := FALSE;
 		END_IF
-		
 	END_IF
 
 ELSE
 	cintaVision := FALSE;
 	cintaBascula := FALSE;
 	cintaPostBascula := FALSE;
-	
-
 END_IF
 
-
-// ----------------- PASO 4 ------------------
-
-// Cintas
+// ------------------- PASO 4 - Actualizar salidas -------------------
 GVLvars.cintaBascula := cintaBascula;
 GVLvars.cintaPostBascula := cintaPostBascula;
 GVLvars.cintaRemoveBascula := cintaRemoveBascula;
 GVLvars.cintaRemoveVision := cintaRemoveVision;
 GVLvars.cintaVision := cintaVision;
-
-// Cilindros
 GVLvars.cilindroBascula := cilindroBascula;
 GVLvars.cilindroVision := cilindroVision;
-
-// Cuadro
 GVLvars.luzAmarilla := luzAmarilla;
 GVLvars.luzRoja := luzRoja;
 GVLvars.luzVerde := luzVerde;
 GVLvars.luzBotonStop := luzStop;
 GVLvars.luzBotonStart := luzStart;
-
-
-
-
-
 ]]></ST>
     </Implementation>
     <LineIds Name="MAIN">
-      <LineId Id="967" Count="103" />
-      <LineId Id="1228" Count="0" />
-      <LineId Id="1230" Count="0" />
-      <LineId Id="1229" Count="0" />
-      <LineId Id="1071" Count="4" />
-      <LineId Id="1232" Count="0" />
-      <LineId Id="1231" Count="0" />
-      <LineId Id="1076" Count="1" />
-      <LineId Id="1269" Count="0" />
-      <LineId Id="1078" Count="4" />
-      <LineId Id="1270" Count="0" />
-      <LineId Id="1086" Count="19" />
-      <LineId Id="1107" Count="7" />
-      <LineId Id="1116" Count="7" />
-      <LineId Id="1259" Count="0" />
-      <LineId Id="1265" Count="1" />
-      <LineId Id="1260" Count="1" />
-      <LineId Id="1267" Count="0" />
-      <LineId Id="1262" Count="0" />
-      <LineId Id="1124" Count="2" />
-      <LineId Id="1283" Count="0" />
-      <LineId Id="1128" Count="3" />
-      <LineId Id="1277" Count="0" />
-      <LineId Id="1237" Count="2" />
-      <LineId Id="1132" Count="9" />
-      <LineId Id="1240" Count="0" />
-      <LineId Id="1142" Count="10" />
-      <LineId Id="1252" Count="0" />
-      <LineId Id="1153" Count="24" />
-      <LineId Id="1276" Count="0" />
-      <LineId Id="1178" Count="4" />
-      <LineId Id="1255" Count="0" />
-      <LineId Id="1183" Count="0" />
-      <LineId Id="1271" Count="0" />
-      <LineId Id="1184" Count="0" />
-      <LineId Id="1253" Count="0" />
-      <LineId Id="1274" Count="0" />
-      <LineId Id="1257" Count="1" />
-      <LineId Id="1256" Count="0" />
-      <LineId Id="1273" Count="0" />
-      <LineId Id="1254" Count="0" />
-      <LineId Id="1185" Count="2" />
-      <LineId Id="1189" Count="0" />
-      <LineId Id="1248" Count="3" />
-      <LineId Id="1246" Count="0" />
-      <LineId Id="1275" Count="0" />
-      <LineId Id="1241" Count="2" />
-      <LineId Id="1195" Count="3" />
-      <LineId Id="1281" Count="1" />
-      <LineId Id="1278" Count="0" />
-      <LineId Id="1280" Count="0" />
-      <LineId Id="1199" Count="27" />
+      <LineId Id="1393" Count="212" />
       <LineId Id="6" Count="0" />
     </LineIds>
   </POU>

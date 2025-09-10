@@ -46,8 +46,43 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"707"</v>
+              <v n="TextDefault">"Automático"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"410"</v>
+              <v n="TextDefault">"Báscula"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"530"</v>
+              <v n="TextDefault">"Cilindro"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"287"</v>
+              <v n="TextDefault">"Cilindro "</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"982"</v>
+              <v n="TextDefault">"Cilindro Peso"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"176"</v>
+              <v n="TextDefault">"Cilindro Visión "</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"301"</v>
               <v n="TextDefault">"Color Objeto"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"284"</v>
+              <v n="TextDefault">"Cuadro de Control"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -66,6 +101,11 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"559"</v>
+              <v n="TextDefault">"Manual"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"801"</v>
               <v n="TextDefault">"Peso"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -76,8 +116,18 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"299"</v>
+              <v n="TextDefault">"Sensor Visión"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"857"</v>
               <v n="TextDefault">"Seta"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"413"</v>
+              <v n="TextDefault">"Seta Emergencia"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
