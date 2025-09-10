@@ -21,8 +21,18 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"707"</v>
+              <v n="TextDefault">"Automático"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"837"</v>
               <v n="TextDefault">"Cargando Palet"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"284"</v>
+              <v n="TextDefault">"Cuadro de Control"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -83,6 +93,11 @@
             <o>
               <v n="TextID">"894"</v>
               <v n="TextDefault">"Indicador de un palet sobre la mesa giratoria"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"807"</v>
+              <v n="TextDefault">"Manual"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>

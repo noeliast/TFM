@@ -3,112 +3,131 @@
   <POU Name="MAIN" Id="{33819508-742b-4c1e-88e6-5bd373dd68ab}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM MAIN
 VAR
-	enclaveStart: BOOL;
-	timerColumna: TON;
-	posicionEst : ARRAY[1..4] OF REAL;
-	distBaldas : distanciaBaldas();
-	iniPosOcupEst : inicializarPosOcupEstanteria();
-	cargando: BOOL;
-	flancoMovingX : F_TRIG;
-	flancoMovingZ : F_TRIG;
-	movingZ: BOOL;
-	movingX: BOOL;
-	descragandoElem: BOOL;
-	descargandoElem: BOOL;
-	elemDescargado: BOOL;
-	state: INT := 1;
-	posInicialZ : real := 0.2;
-	horquillaExtendida: BOOL;
-	timerExternsionHorquilla: TON;
-	startTimerHorquilla: BOOL;
-	timerExtension: BOOL;
-	posActual: REAL;
-	bajarHorquilla: BOOL;
-	timerBajarHorquilla: TON;
-	incfementoBaizadaH : REAL := 0.4;
-	enPosicoin: BOOL;
-	posmovingZ: REAL;
-	luzStart :bool;
-	luzReset: BOOL;
-	luzStop : bool;
-	luzVerde: BOOL;
-	luzAmarilla: BOOL;
-	luzRoja: BOOL;
-	emergencia: BOOL;
-	cinta:bool;
-	setPointX: REAL;
-	setPointZ: REAL;
-	cintaTransportadoraPalet: BOOL;
-	botonReset: BOOL;
-	seta : bool;
-	botonStart: BOOL;
-	botonStop: BOOL;
-	filaEstanteria: INT;
-	colEstanteria: INT;
-	moving: REAL;
-	modoManual: BOOL;
-	modoAuto: BOOL;
-	primeraEjecucion: BOOL := true;
+    // --------------------------- Sistema principal ---------------------------
+    enclaveStart: BOOL;         // Indica si el sistema esta activo
+    emergencia: BOOL;           // Señal de emergencia activa
+    primeraEjecucion: BOOL := TRUE; // Indica si es la primera ejecucion
+    state: INT := 1;            // Estado actual de la maquina
+
+    // --------------------------- Luces del cuadro ---------------------------
+    luzStart: BOOL;             // Luz indicador Start
+    luzStop: BOOL;              // Luz indicador Stop
+    luzReset: BOOL;             // Luz indicador Reset
+    luzVerde: BOOL;             // Luz verde del sistema
+    luzAmarilla: BOOL;          // Luz amarilla del sistema
+    luzRoja: BOOL;              // Luz roja del sistema
+
+    // --------------------------- Cintas ---------------------------
+    cinta: BOOL;                // Cinta principal
+    cintaTransportadoraPalet: BOOL; // Cinta transportadora de palet
+
+    // --------------------------- Posiciones y movimiento ---------------------------
+    setPointX: REAL;            // Posicion objetivo X
+    setPointZ: REAL;            // Posicion objetivo Z
+    posActual: REAL;            // Posicion actual (sin uso directo en codigo)
+    posicionEst: ARRAY[1..4] OF REAL; // Posiciones de estanteria X/Z/fila/col
+    posmovingZ: REAL;           // Posicion Z de horquilla durante movimiento
+    movingX: BOOL;              // Indica si la horquilla esta en X correcta
+    movingZ: BOOL;              // Indica si la horquilla esta en Z correcta
+    reposo: BOOL;               // Indica estado de reposo
+    enPosicoin: BOOL;           // Indica si horquilla en posicion exacta Z
+    incfementoBaizadaH: REAL := 0.4; // Incremento de bajada horquilla
+    posInicialZ: REAL := 0.2;   // Posicion inicial Z horquilla
+
+    // --------------------------- Horquilla ---------------------------
+    horquillaExtendida: BOOL;   // Indica si horquilla se extendio
+    bajarHorquilla: BOOL;       // Indica bajada de horquilla
+    startTimerHorquilla: BOOL;  // Inicia temporizador horquilla
+    timerExternsionHorquilla: TON; // Temporizador para extension horquilla
+    timerBajarHorquilla: TON;   // Temporizador bajada horquilla
+
+    // --------------------------- Sensores y flancos ---------------------------
+    flancoMovingX: F_TRIG;      // Flanco movimiento X
+    flancoMovingZ: F_TRIG;      // Flanco movimiento Z
+
+    // --------------------------- Elementos ---------------------------
+    cargando: BOOL;             // Indica que se esta cargando elemento
+    descargandoElem: BOOL;      // Indica que se esta descargando elemento
+    elemDescargado: BOOL;       // Indica que elemento finalizo descarga
+    elemCargado: BOOL;          // PERSISTENT - Elemento cargado
+
+    // --------------------------- Funciones ---------------------------
+    distBaldas: distanciaBaldas();         // Calcula distancia de baldas
+    iniPosOcupEst: inicializarPosOcupEstanteria(); // Inicializa pos estanterias
+
+    // --------------------------- Botones ---------------------------
+    botonStart: BOOL;
+    botonStop: BOOL;
+    botonReset: BOOL;
+    seta: BOOL;
+
+    // --------------------------- Estanteria ---------------------------
+    filaEstanteria: INT;
+    colEstanteria: INT;
+
+    // --------------------------- Modo de operacion ---------------------------
+    modoManual: BOOL;
+    modoAuto: BOOL;
+
+    // --------------------------- Variables auxiliares ---------------------------
+    moving: REAL;               // Variable auxiliar movimiento
 END_VAR
 
-VAR PERSISTENT
-	elemCargado: BOOL;
-END_VAR]]></Declaration>
+
+]]></Declaration>
     <Implementation>
       <ST><![CDATA[// ----------------------------- Logica Botones ----------------------------------------
-
-//Luces Botons
+// Luces botones
 luzStart := FALSE;
 luzStop := FALSE;
-luzReset:=FALSE;
+luzReset := FALSE;
 
-
+// Boton Start
 IF GVLvar.botonStart AND NOT emergencia THEN
-	luzStart:= TRUE;
-	luzVerde := TRUE;
+	luzStart := TRUE;          // Enciende luz Start
+	luzVerde := TRUE;          // Luz verde
 	luzAmarilla := FALSE;
 	luzRoja := FALSE;
-	enclaveStart := TRUE;
-	//primeraEjecucion := TRUE;
-	setPointZ := 0.2;
+	enclaveStart := TRUE;      // Activar sistema
+	setPointZ := 0.2;          // Posicion inicial horquilla
 END_IF
 
+// Boton Stop
 IF NOT GVLvar.botonStop AND NOT emergencia THEN
-	luzStop := TRUE;
+	luzStop := TRUE;           // Luz Stop encendida
 	luzVerde := FALSE;
 	luzAmarilla := TRUE;
 	luzRoja := FALSE;
-	enclaveStart := FALSE;
-	cinta := FALSE;
+	enclaveStart := FALSE;     // Desactivar sistema
+	cinta := FALSE;            // Para cintas
 	cintaTransportadoraPalet := FALSE;
 END_IF
 
-
-IF  NOT GVLvar.seta THEN
-	luzRoja:= TRUE;
+// Emergencia activa
+IF NOT GVLvar.seta THEN
+	luzRoja := TRUE;
 	luzVerde := FALSE;
 	luzAmarilla := FALSE;
-	
 	emergencia := TRUE;
 	cinta := FALSE;
-	cintaTransportadoraPalet := FALSE	; 
+	cintaTransportadoraPalet := FALSE;
 	enclaveStart := FALSE;
 END_IF
 
-
-IF  GVLvar.seta AND emergencia THEN
+// Reset de emergencia
+IF GVLvar.seta AND emergencia THEN
 	IF GVLvar.botonReset THEN
 		emergencia := FALSE;
 		cinta := TRUE;
-		cintaTransportadoraPalet := TRUE; 
+		cintaTransportadoraPalet := TRUE;
 		enclaveStart := TRUE;
 		luzRoja := FALSE;
 		luzVerde := TRUE;
 		luzAmarilla := FALSE;
-	END_IF	
+	END_IF
 END_IF
 
-
+// Modo manual/auto
 IF GVLvar.modoManual THEN
 	modoManual := TRUE;
 	modoAuto := FALSE;
@@ -119,147 +138,132 @@ IF GVLvar.modoAuto THEN
 	modoAuto := TRUE;
 END_IF
 
-// Si es la primra vez que se arranca la planta
+// Primera ejecucion inicializa baldas
 IF primeraEjecucion THEN
-	distBaldas(); // Se establece las posicnoes de las baldas
-	iniPosOcupEst();// Se inicializan las posicones como libres
+	distBaldas();       // Calcula posiciones de baldas
+	iniPosOcupEst();    // Inicializa estanterias libres
 	primeraEjecucion := FALSE;
 END_IF
 
-// ---------------------------------------------------------------------
-
+// ----------------------------- Logica principal ----------------------------------------
 IF enclaveStart THEN
-	
 
 	CASE state OF
-	
+
 		// 1. Esperando Start
-		1: 
-			cinta := TRUE;
-			cintaTransportadoraPalet := TRUE; 
-			setPointZ := posInicialZ;
-			state := 2;  // pasar al siguiente estado
-			
+		1:
+			setPointZ := posInicialZ;   // Posicion reposo horquilla
+			reposo := TRUE;
+			state := 2;
+
 		// 2. Espera caja en la entrada
 		2:
+			cinta := TRUE;               // Arranca cintas
+			cintaTransportadoraPalet := TRUE;
 			IF GVLvar.sensorEntradaGrua THEN
 				cinta := FALSE;
 				cintaTransportadoraPalet := FALSE;
-				GVLvar.moveForksRight := TRUE;
+				GVLvar.moveForksRight := TRUE; // Mueve horquilla a derecha
 				state := 3;
 			END_IF
-	
+
 		// 3. Horquilla desplegando
 		3:
 			IF GVLvar.forkRightLimit THEN
 				setPointZ := posInicialZ + 0.2;
 				startTimerHorquilla := TRUE;
 			END_IF
-			
-			timerExternsionHorquilla (IN:=startTimerHorquilla, PT:= T#2S);
-			
-			horquillaExtendida :=  (GVLvar.movingZ = (posInicialZ + 0.2)) OR (GVLvar.movingZ > ((posInicialZ + 0.2)-0.05)) OR (GVLvar.movingZ < ((posInicialZ + 0.2)+0.05));
-			//IF GVLvar.movingZ = (posInicialZ + 0.2) THEN
+			timerExternsionHorquilla(IN:=startTimerHorquilla, PT:=T#2S);
+			horquillaExtendida := (GVLvar.movingZ = (posInicialZ + 0.2)) OR 
+			                      (GVLvar.movingZ > ((posInicialZ + 0.2)-0.05)) OR 
+			                      (GVLvar.movingZ < ((posInicialZ + 0.2)+0.05));
+
 			IF timerExternsionHorquilla.Q AND horquillaExtendida THEN
-				GVLvar.moveForksRight := FALSE;
+				GVLvar.moveForksRight := FALSE; // Detiene horquilla
 				elemCargado := TRUE;
 				startTimerHorquilla := FALSE;
 				state := 4;
 			END_IF
-			
-//			IF GVLvar.forkMiddleLimit  AND elemCargado THEN 
-				
-				
-//			END_IF
-	
-		// 4. Calcular posición libre y mover X/Z
+
+		// 4. Calcular posicion libre y mover X/Z
 		4:
-			IF elemCargado AND GVLvar.forkMiddleLimit THEN 
-				posicionEst := posicionEstanteria();
-				// Si devuelve una posicion valida
+			IF elemCargado AND GVLvar.forkMiddleLimit THEN
+				posicionEst := posicionEstanteria(); // Calcula posicion libre
 				IF posicionEst[1]<>0 AND posicionEst[2]<>0 THEN
-					setPointX := posicionEst[1];   // columna (X)
-					setPointZ := posicionEst[2]+0.4;   // fila (Z)
+					setPointX := posicionEst[1];           // columna X
+					setPointZ := posicionEst[2]+0.4;      // fila Z
 					filaEstanteria := TO_INT(posicionEst[3]);
 					colEstanteria := TO_INT(posicionEst[4]);
+					reposo := FALSE;
 					elemCargado := FALSE;
 					descargandoElem := TRUE;
 					state := 5;
 				END_IF
 			END_IF
-	
+
 		// 5. Esperar llegar a destino
 		5:
-			 movingX := (GVLvar.movingX = posicionEst[1]) OR (GVLvar.movingX > (posicionEst[1]-0.05) AND GVLvar.movingX < posicionEst[1]) OR (GVLvar.movingX < (posicionEst[1]+0.05)AND GVLvar.movingX > posicionEst[1]) ;
-			 movingZ := (GVLvar.movingZ = posicionEst[2]+0.4) OR (GVLvar.movingZ > (posicionEst[2]-0.05+0.4) AND GVLvar.movingZ < posicionEst[2]+0.4) OR (GVLvar.movingZ < (posicionEst[2]+0.05+0.4) AND GVLvar.movingZ > posicionEst[2]+0.4);
-			 
-			 
+			movingX := (GVLvar.movingX = posicionEst[1]) OR
+			           (GVLvar.movingX > (posicionEst[1]-0.05) AND GVLvar.movingX < posicionEst[1]) OR
+			           (GVLvar.movingX < (posicionEst[1]+0.05) AND GVLvar.movingX > posicionEst[1]);
+			movingZ := (GVLvar.movingZ = posicionEst[2]+0.4) OR
+			           (GVLvar.movingZ > (posicionEst[2]-0.05+0.4) AND GVLvar.movingZ < posicionEst[2]+0.4) OR
+			           (GVLvar.movingZ < (posicionEst[2]+0.05+0.4) AND GVLvar.movingZ > posicionEst[2]+0.4);
+
 			IF movingZ AND movingX AND descargandoElem THEN
-				GVLvar.moveForksLeft := TRUE;
+				GVLvar.moveForksLeft := TRUE;  // Comienza bajada horquilla
 				bajarHorquilla := TRUE;
 				state := 6;
 			END_IF
-			
-			
-		6:	
-			//timerBajarHorquilla (IN:= bajarHorquilla, PT:=T#2S);
-			
-			//IF  enPosicoin AND GVLvar.forkMiddleLimit THEN  
+
+		// 6. Horquilla bajando
+		6:
 			IF GVLvar.forkLeftLimit THEN
-				 moving := GVLvar.movingZ;
+				moving := GVLvar.movingZ;
 				IF moving > 0 THEN 
-					setPointZ := GVLvar.movingZ - incfementoBaizadaH ;	
+					setPointZ := GVLvar.movingZ - incfementoBaizadaH;
 				END_IF
 				descargandoElem := FALSE;
 				bajarHorquilla := FALSE;
 				state := 7;
 			END_IF
-			
-		// 6. Horquilla descargando
+
+		// 7. Horquilla descargando
 		7:
-			posmovingZ := GVLvar.movingZ;	
-			enPosicoin  := (posmovingZ = posicionEst[2]) OR (posmovingZ > (posicionEst[2] -0.05) AND posmovingZ < posicionEst[2]) OR (posmovingZ < (posicionEst[2]+0.05) AND posmovingZ > posicionEst[2]);
-			 
+			posmovingZ := GVLvar.movingZ;
+			enPosicoin := (posmovingZ = posicionEst[2]) OR
+			               (posmovingZ > (posicionEst[2]-0.05) AND posmovingZ < posicionEst[2]) OR
+			               (posmovingZ < (posicionEst[2]+0.05) AND posmovingZ > posicionEst[2]);
 			IF GVLvar.forkLeftLimit AND enPosicoin THEN
 				GVLvar.moveForksLeft := FALSE;
 				elemDescargado := TRUE;
 				state := 8;
-       		END_IF
-			
-		
-			
-		// 7. Volver a origen
+			END_IF
+
+		// 8. Volver a origen
 		8:
 			IF elemDescargado AND GVLvar.forkMiddleLimit THEN
 				setPointX := 0.0;
-				setPointZ :=posInicialZ;
+				setPointZ := posInicialZ;
 				elemDescargado := FALSE;
 				cinta := TRUE;
-				cintaTransportadoraPalet := TRUE; 
+				cintaTransportadoraPalet := TRUE;
 				IF modoManual THEN
 					enclaveStart := FALSE;
 					cinta := FALSE;
-					cintaTransportadoraPalet := false; 
+					cintaTransportadoraPalet := FALSE;
 				END_IF
+				filaEstanteria := 0;
+				colEstanteria := 0;
 				state := 1;
 			END_IF
-	
-	//    // 8. Reanudar cinta y volver a esperar
-	//    8:
-	//        IF (GVLvar.movingX = 0.0) AND (GVLvar.movingZ = 0.3) THEN
-	//            GVLvar.cinta := TRUE;
-	//            state := 2;   // vuelve a esperar siguiente caja
-	//        END_IF
-	
-		// Estado por defecto (seguridad)
+
 		ELSE
-			state := 1;
-	
+			state := 1; // Estado por defecto seguridad
 	END_CASE
 END_IF
 
-
-// ----------------------------- Actualizar Salidas  ----------------------------------------
+// ----------------------------- Actualizar Salidas ----------------------------------------
 GVLvar.setPointX := setPointX;
 GVLvar.setPointZ := setPointZ;
 
@@ -272,60 +276,10 @@ GVLvar.luzBotonStop := luzStop;
 
 GVLvar.cinta := cinta;
 GVLvar.cintaTransportadoraPalet := cintaTransportadoraPalet;
-
-
-//GVLvar.seta := seta;
-//GVLvar.botonReset := botonReset;
-//GVLvar.botonStart := botonStart;
-//GVLvar.botonStop := botonStop:
-
-
 ]]></ST>
     </Implementation>
     <LineIds Name="MAIN">
-      <LineId Id="633" Count="7" />
-      <LineId Id="645" Count="5" />
-      <LineId Id="982" Count="0" />
-      <LineId Id="655" Count="36" />
-      <LineId Id="960" Count="2" />
-      <LineId Id="964" Count="0" />
-      <LineId Id="971" Count="0" />
-      <LineId Id="965" Count="0" />
-      <LineId Id="963" Count="0" />
-      <LineId Id="692" Count="0" />
-      <LineId Id="967" Count="0" />
-      <LineId Id="969" Count="0" />
-      <LineId Id="968" Count="0" />
-      <LineId Id="990" Count="0" />
-      <LineId Id="985" Count="2" />
-      <LineId Id="989" Count="0" />
-      <LineId Id="995" Count="0" />
-      <LineId Id="988" Count="0" />
-      <LineId Id="984" Count="0" />
-      <LineId Id="693" Count="8" />
-      <LineId Id="709" Count="0" />
-      <LineId Id="975" Count="0" />
-      <LineId Id="710" Count="3" />
-      <LineId Id="978" Count="0" />
-      <LineId Id="715" Count="33" />
-      <LineId Id="849" Count="0" />
-      <LineId Id="841" Count="0" />
-      <LineId Id="845" Count="1" />
-      <LineId Id="896" Count="1" />
-      <LineId Id="847" Count="1" />
-      <LineId Id="843" Count="1" />
-      <LineId Id="755" Count="19" />
-      <LineId Id="901" Count="0" />
-      <LineId Id="900" Count="0" />
-      <LineId Id="905" Count="0" />
-      <LineId Id="904" Count="0" />
-      <LineId Id="909" Count="1" />
-      <LineId Id="908" Count="0" />
-      <LineId Id="779" Count="22" />
-      <LineId Id="972" Count="1" />
-      <LineId Id="976" Count="1" />
-      <LineId Id="974" Count="0" />
-      <LineId Id="802" Count="38" />
+      <LineId Id="1634" Count="199" />
       <LineId Id="565" Count="0" />
     </LineIds>
   </POU>
