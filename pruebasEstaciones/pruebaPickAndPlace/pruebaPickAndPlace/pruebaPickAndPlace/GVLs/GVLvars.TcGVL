@@ -38,25 +38,15 @@ VAR_GLOBAL
 
 	
 	// Pick & Place
-//	{attribute 'OPC.UA.DA' := '1'}
-//	pickAndPlace : BOOL;
+
 	{attribute 'OPC.UA.DA' := '1'}
 	PickPlace_MoverX : BOOL;
 	{attribute 'OPC.UA.DA' := '1'}
 	PickPlace_MoverZ : BOOL;
-//	ppRotarH : BOOL;
-//	ppRotarAH : BOOL;
-//	ppRotarPinzaH: BOOL;
-//	ppRotarPinzaAH : BOOL;
-//	ppVentosa : BOOL;
-{attribute 'OPC.UA.DA' := '1'}
+	{attribute 'OPC.UA.DA' := '1'}
 	PickPlace_Agarrar : BOOL;
 	{attribute 'OPC.UA.DA' := '1'}
 	PickPlace_Detectado : BOOL;
-	//sensores
-	// ...
-//	{attribute 'OPC.UA.DA' := '1'}
-//	ppObjeto : BOOL;
 	{attribute 'OPC.UA.DA' := '1'}
 	PickPlace_MovingXY: BOOL;
 	{attribute 'OPC.UA.DA' := '1'}

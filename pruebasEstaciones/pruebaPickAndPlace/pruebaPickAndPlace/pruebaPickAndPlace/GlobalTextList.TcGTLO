@@ -16,6 +16,16 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"694"</v>
+              <v n="TextDefault">"Abrazaderas"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"707"</v>
+              <v n="TextDefault">"Automático"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"436"</v>
               <v n="TextDefault">"Cinta con Bases"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -33,6 +43,26 @@
             <o>
               <v n="TextID">"583"</v>
               <v n="TextDefault">"Cinta con Tapas"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"194"</v>
+              <v n="TextDefault">"Cinta para Bases"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"28"</v>
+              <v n="TextDefault">"Cinta para BasesCinta para Bases"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"35"</v>
+              <v n="TextDefault">"Cinta para Tapas"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"284"</v>
+              <v n="TextDefault">"Cuadro de Control"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -71,8 +101,18 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"536"</v>
+              <v n="TextDefault">"Manual"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"305"</v>
               <v n="TextDefault">"mover Brazo Z"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"369"</v>
+              <v n="TextDefault">"Pick &amp; Place"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -98,6 +138,11 @@
             <o>
               <v n="TextID">"857"</v>
               <v n="TextDefault">"Seta"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"413"</v>
+              <v n="TextDefault">"Seta Emergencia"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
